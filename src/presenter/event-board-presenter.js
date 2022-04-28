@@ -1,23 +1,20 @@
-import EventListView from '../view/event-list-view';
+import EventsListView from '../view/events-list-view';
 import EventView from '../view/event-view';
 import EventEditView from '../view/event-edit-view';
 import SortView from '../view/sort-view';
-
-
 import {render} from '../render.js';
 
+
 export default class BoardPresenter {
-  eventListComponent = new EventListView();
+  eventsListComponent = new EventsListView();
 
   init = (boardContainer) => {
     this.boardContainer = boardContainer;
 
     render(new SortView(), this.boardContainer);
-    render(this.eventListComponent, this.boardContainer);
-    render(new EventEditView(), this.eventListComponent.getElement());
+    render(this.eventsListComponent, this.boardContainer);
+    render(new EventEditView(), this.eventsListComponent.getElement());
 
-    for (let i = 0; i < 3; i++) {
-      render(new EventView(), this.eventListComponent.getElement());
-    }
+    Array.from({ length: 3 }, () => render(new EventView(), this.eventsListComponent.getElement()));
   };
 }
