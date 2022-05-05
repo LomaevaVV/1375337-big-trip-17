@@ -5,7 +5,8 @@ export const getRandomNumber = (min, max) => {
     const randomNumber = Math.random() * ((max + 1) - min) + min;
 
     return Math.floor(randomNumber);
-  } throw new Error('Диапазон задан неверно: минимальное значение диапазона должно быть меньше максимального. Граничные значения диапазона не могут быть меньше 0.');
+  }
+  throw new Error('Диапазон задан неверно: минимальное значение диапазона должно быть меньше максимального. Граничные значения диапазона не могут быть меньше 0.');
 };
 
 export const getRandomArrayElement = (elements) => elements[getRandomNumber(0, elements.length - 1)];
@@ -28,5 +29,5 @@ export const getShuffleArraySlice = (arrayInput) => {
 
 export const humanizeEventDate = (date, format) => dayjs(date).format(format);
 
-export const calculateDateDif = (dateFrom, dateTo) => dayjs(dateTo).diff(dateFrom, 'minute');
+export const calculateDateDif = (dateFrom, dateTo, unit = 'minute') => dayjs(dateTo).diff(dateFrom, unit);
 

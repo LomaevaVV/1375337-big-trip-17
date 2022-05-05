@@ -5,7 +5,7 @@ const OFFER_PRICE_MAX = 200;
 
 export const offersСatalog = [
   {
-    type: 'flight',
+    type: 'Flight',
     offers: [
       {
         id: 1,
@@ -23,7 +23,7 @@ export const offersСatalog = [
     ],
   },
   {
-    type: 'taxi',
+    type: 'Taxi',
     offers: [
       {
         id: 1,
@@ -43,7 +43,7 @@ export const offersСatalog = [
     ],
   },
   {
-    type: 'bus',
+    type: 'Bus',
     offers: [
       {
         id: 1,
@@ -58,7 +58,7 @@ export const offersСatalog = [
     ],
   },
   {
-    type: 'train',
+    type: 'Train',
     offers: [
       {
         id: 1,
@@ -73,7 +73,7 @@ export const offersСatalog = [
     ],
   },
   {
-    type: 'restaurant',
+    type: 'Restaurant',
     offers: [
       {
         id: 1,
@@ -83,7 +83,7 @@ export const offersСatalog = [
     ]
   },
   {
-    type: 'check-in',
+    type: 'Check-in',
     offers: [
       {
         id: 1,
@@ -98,7 +98,7 @@ export const offersСatalog = [
     ]
   },
   {
-    type: 'drive',
+    type: 'Drive',
     offers: [
       {
         id: 1,

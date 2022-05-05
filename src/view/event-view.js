@@ -26,27 +26,21 @@ const createEventTemplate = (event) => {
     type
   } = event;
 
-  const dateFromToDate = humanizeEventDate(dateFrom,'YYYY-MM-DD');
-  const dateFromToTitle = humanizeEventDate(dateFrom,'DD MMM');
-  const dateFromToDateTime = humanizeEventDate(dateFrom,'YYYY-MM-DD[T]HH:mm');
-  const dateFromToTime = humanizeEventDate(dateFrom,'HH:mm');
-  const dateToToDateTime = humanizeEventDate(dateTo,'YYYY-MM-DD[T]HH:mm');
-  const dateToToTime = humanizeEventDate(dateTo,'HH:mm');
-  const getFavoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
+  const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
   return (
     `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="${dateFromToDate}">${dateFromToTitle}</time>
+      <time class="event__date" datetime="${humanizeEventDate(dateFrom,'YYYY-MM-DD')}">${humanizeEventDate(dateFrom,'DD MMM')}</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
       <h3 class="event__title">${type} ${destination.destinationName}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="${dateFromToDateTime}">${dateFromToTime}</time>
+          <time class="event__start-time" datetime="${humanizeEventDate(dateFrom,'YYYY-MM-DD[T]HH:mm')}">${humanizeEventDate(dateFrom,'HH:mm')}</time>
           &mdash;
-          <time class="event__end-time" datetime="${dateToToDateTime}">${dateToToTime}</time>
+          <time class="event__end-time" datetime="${humanizeEventDate(dateTo,'YYYY-MM-DD[T]HH:mm')}">${humanizeEventDate(dateTo,'HH:mm')}</time>
         </p>
         <p class="event__duration">${calculateDateDif(dateFrom, dateTo)}</p>
       </div>
@@ -57,7 +51,7 @@ const createEventTemplate = (event) => {
       <ul class="event__selected-offers">
         ${getOffersTemplate(offers)}
       </ul>
-      <button class="event__favorite-btn ${getFavoriteClass}" type="button">
+      <button class="event__favorite-btn ${favoriteClass}" type="button">
         <span class="visually-hidden">Add to favorite</span>
         <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
           <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>

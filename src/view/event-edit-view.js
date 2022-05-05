@@ -1,6 +1,6 @@
 import {createElement} from '../render.js';
 import {humanizeEventDate} from '../utils.js';
-import {offersСatalog} from '../fish/offers.js';
+import {offersСatalog} from '../mock/offers.js';
 
 const getOffersByType = (type) => offersСatalog.find((offer) => offer.type === type);
 
@@ -26,7 +26,7 @@ const createOfferTemplate = (currentOffer, selectedOffers) => {
 };
 
 const createOffersTemplate = (availableOffers, selectedOffers) => {
-  if (availableOffers.length === 0) {
+  if (availableOffers?.length === 0) {
     return '';
   }
 
@@ -79,14 +79,10 @@ const createEventEditTemplate = (event) => {
     type
   } = event;
 
-  const availableOffers = getOffersByType(type)?
-    getOffersByType(type).offers
-    : [];
+  const availableOffers = getOffersByType(type)?.offers||[];
 
   const offersTemplate = createOffersTemplate(availableOffers, offers);
   const destinationsTemplate = createDestinationsTemplate(destination);
-  const dateFromToDateTime = humanizeEventDate(dateFrom, 'DD/MM/YY HH:mm');
-  const dateToToDateTime = humanizeEventDate(dateTo, 'DD/MM/YY HH:mm');
 
   return (
     `<li class="trip-events__item">
@@ -121,10 +117,10 @@ const createEventEditTemplate = (event) => {
 
           <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFromToDateTime}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${humanizeEventDate(dateFrom, 'DD/MM/YY HH:mm')}">
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateToToDateTime}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${humanizeEventDate(dateTo, 'DD/MM/YY HH:mm')}">
           </div>
 
           <div class="event__field-group  event__field-group--price">

@@ -1,15 +1,15 @@
 import {getRandomNumber, getRandomArrayElement, getShuffleArraySlice} from '../utils.js';
 import dayjs from 'dayjs';
+import {nanoid} from 'nanoid';
 import {offersСatalog} from './offers.js';
+import {POINT_TYPES} from '../constants.js';
 
-const POINT_TYPE = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 const DESCRIPTION = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'Cras aliquet varius magna, non porta ligula feugiat eget.','Fusce tristique felis at fermentum pharetra.','Aliquam id orci ut lectus varius viverra.','Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.','Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.','Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.','Sed sed nisi sed augue convallis suscipit in sed felis.','Aliquam erat volutpat.','Nunc fermentum tortor ac porta dapibus.','In rutrum ac purus sit amet tempus.'];
 const DESTINATION_NAME =['Chamonix','Amsterdam','Geneva'];
 const PICTURE_ID_MIN = 1;
 const PICTURE_ID_MAX = 5;
 const PRICE_MIN = 100;
 const PRICE_MAX = 1500;
-const IS_FAVORITE = [true, false];
 const DATE_DIF = [30, 50, 70];
 
 const generateDestination = () => ({
@@ -23,19 +23,16 @@ const generateDestination = () => ({
   ]
 });
 
-const getDate = (dateMin, dateMax) => `0${getRandomNumber(dateMin,dateMax)}`.slice(-2);
-
 export const generateEvent = () => {
-  const type = getRandomArrayElement(POINT_TYPE);
-  const timeHourFrom = `20${getDate(19,22)}-${getDate(1,12)}-${getDate(1,31)}T${getDate(0,23)}:${getDate(0,59)}:56.845Z`;
+  const type = getRandomArrayElement(POINT_TYPES);
+  const timeHourFrom = (dayjs('2019-07-11T11:22:13').add(getRandomNumber(1,100000), 'minute')).toString();
 
-
-  const getAvailableOffers = offersСatalog.find(
+  const AvailableOffers = offersСatalog.find(
     (offer) => offer.type === type
   );
 
-  const getOffers = getAvailableOffers?
-    getShuffleArraySlice(getAvailableOffers.offers)
+  const selectedOffers = AvailableOffers?
+    getShuffleArraySlice(AvailableOffers.offers)
     : [];
 
   return ({
@@ -43,9 +40,9 @@ export const generateEvent = () => {
     dateFrom: timeHourFrom,
     dateTo: dayjs(timeHourFrom).add(getRandomArrayElement(DATE_DIF), 'minute'),
     destination: generateDestination(),
-    id: '',
-    isFavorite: getRandomArrayElement(IS_FAVORITE),
-    offers: getOffers,
+    id: nanoid(),
+    isFavorite: Boolean(getRandomNumber(0, 1)),
+    offers: selectedOffers,
     type: type,
   });
 };

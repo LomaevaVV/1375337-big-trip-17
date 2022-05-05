@@ -16,9 +16,8 @@ export default class BoardPresenter {
     render(this.eventsListComponent, this.boardContainer);
     render(new EventEditView(this.boardEvents[0]), this.eventsListComponent.getElement());
 
-    for (let i = 1; i < this.boardEvents.length; i++) {
-      render(new EventView(this.boardEvents[i]), this.eventsListComponent.getElement());
+    for (const event of this.boardEvents) {
+      render(new EventView(event), this.eventsListComponent.getElement());
     }
-    // Array.from({ length: this.boardEvents.length}, () => render(new EventView(this.boardEvents), this.eventsListComponent.getElement()));
   };
 }
