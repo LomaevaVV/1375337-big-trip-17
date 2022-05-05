@@ -4,17 +4,20 @@ import EventEditView from '../view/event-edit-view';
 import SortView from '../view/sort-view';
 import {render} from '../render.js';
 
-
 export default class BoardPresenter {
   eventsListComponent = new EventsListView();
 
-  init = (boardContainer) => {
+  init = (boardContainer, eventsModel) => {
     this.boardContainer = boardContainer;
+    this.eventsModel = eventsModel;
+    this.boardEvents = [...this.eventsModel.getEvents()];
 
     render(new SortView(), this.boardContainer);
     render(this.eventsListComponent, this.boardContainer);
-    render(new EventEditView(), this.eventsListComponent.getElement());
+    render(new EventEditView(this.boardEvents[0]), this.eventsListComponent.getElement());
 
-    Array.from({ length: 3 }, () => render(new EventView(), this.eventsListComponent.getElement()));
+    for (const event of this.boardEvents) {
+      render(new EventView(event), this.eventsListComponent.getElement());
+    }
   };
 }
