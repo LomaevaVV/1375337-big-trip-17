@@ -1,7 +1,8 @@
-import EventsListView from '../view/events-list-view';
-import EventView from '../view/event-view';
-import EventEditView from '../view/event-edit-view';
-import SortView from '../view/sort-view';
+import EventsListView from '../view/events-list-view.js';
+import EventView from '../view/event-view.js';
+import EventEditView from '../view/event-edit-view.js';
+import SortView from '../view/sort-view.js';
+import NoEventsMsg from '../view/no-event-view.js';
 import {render} from '../render.js';
 import {isEscEvent} from '../utils.js';
 
@@ -22,10 +23,13 @@ export default class BoardPresenter {
   };
 
   #renderEventBoard = () => {
-    render(new SortView(), this.#boardContainer);
-    render(this.#eventsListComponent, this.#boardContainer);
-
-    this.#boardEvents.forEach((event) => this.#renderEvent(event));
+    if (this.#boardEvents.length === 0) {
+      render(new NoEventsMsg(), this.#boardContainer);
+    } else {
+      render(new SortView(), this.#boardContainer);
+      render(this.#eventsListComponent, this.#boardContainer);
+      this.#boardEvents.forEach((event) => this.#renderEvent(event));
+    }
   };
 
   #renderEvent = (event)  => {
