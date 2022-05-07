@@ -37,7 +37,7 @@ export const generateEvent = () => {
   return ({
     basePrice: getRandomNumber(PRICE_MIN, PRICE_MAX),
     dateFrom: timeHourFrom,
-    dateTo: dayjs(timeHourFrom).add(getRandomNumber(30, 3000), 'minute'),
+    dateTo: dayjs(timeHourFrom).add(getRandomNumber(30, 2000), 'minute'),
     destination: generateDestination(),
     id: nanoid(),
     isFavorite: Boolean(getRandomNumber(0, 1)),

@@ -14,17 +14,18 @@ export default class BoardPresenter {
   #boardEvents = [];
 
   init = (boardContainer, eventsModel) => {
-    this.#boardContainer = boardContainer;
     this.#eventsModel = eventsModel;
     this.#boardEvents = [...this.#eventsModel.events];
+    this.#boardContainer = boardContainer;
 
+    this.#renderEventBoard();
+  };
+
+  #renderEventBoard = () => {
     render(new SortView(), this.#boardContainer);
     render(this.#eventsListComponent, this.#boardContainer);
-    // render(new EventEditView(this.#boardEvents[0]), this.#eventsListComponent.element);
 
-    for (const event of this.#boardEvents) {
-      this.#renderEvent(event);
-    }
+    this.#boardEvents.forEach((event) => this.#renderEvent(event));
   };
 
   #renderEvent = (event)  => {
