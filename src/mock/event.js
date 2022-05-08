@@ -10,7 +10,6 @@ const PICTURE_ID_MIN = 1;
 const PICTURE_ID_MAX = 5;
 const PRICE_MIN = 100;
 const PRICE_MAX = 1500;
-const DATE_DIF = [30, 50, 70];
 
 const generateDestination = () => ({
   description: getShuffleArraySlice(DESCRIPTION),
@@ -38,7 +37,7 @@ export const generateEvent = () => {
   return ({
     basePrice: getRandomNumber(PRICE_MIN, PRICE_MAX),
     dateFrom: timeHourFrom,
-    dateTo: dayjs(timeHourFrom).add(getRandomArrayElement(DATE_DIF), 'minute'),
+    dateTo: dayjs(timeHourFrom).add(getRandomNumber(30, 2000), 'minute'),
     destination: generateDestination(),
     id: nanoid(),
     isFavorite: Boolean(getRandomNumber(0, 1)),
