@@ -28,7 +28,7 @@ export default class BoardPresenter {
     } else {
       render(new SortView(), this.#boardContainer);
       render(this.#eventsListComponent, this.#boardContainer);
-      this.#boardEvents.forEach((event) => this.#renderEvent(event));
+      this.#boardEvents.forEach(this.#renderEvent);
     }
   };
 
