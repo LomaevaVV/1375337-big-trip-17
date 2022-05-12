@@ -1,5 +1,5 @@
-import {createElement} from '../render.js';
-import {humanizeEventDate} from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import {humanizeEventDate} from '../utils/event.js';
 import {offersСatalog} from '../mock/offers.js';
 
 const getOffersByType = (type) => offersСatalog.find((offer) => offer.type === type);
@@ -146,11 +146,11 @@ const createEventEditTemplate = (event) => {
   );
 };
 
-export default class EventEditView {
+export default class EventEditView extends AbstractView {
   #event = null;
-  #element = null;
 
   constructor(event) {
+    super();
     this.#event = event;
   }
 
@@ -158,15 +158,23 @@ export default class EventEditView {
     return createEventEditTemplate(this.#event);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setFormSubmitHandler = (callback) => {
+    this._callback.formSubmit = callback;
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+  };
 
-    return this.#element;
-  }
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit();
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  setEditClickHandler = (callback) => {
+    this._callback.editClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+  };
+
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.editClick();
+  };
 }

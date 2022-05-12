@@ -1,4 +1,4 @@
-import {getRandomNumber, getRandomArrayElement, getShuffleArraySlice} from '../utils.js';
+import {getRandomNumber, getRandomArrayElement, getShuffleArraySlice} from '../utils/common.js';
 import dayjs from 'dayjs';
 import {nanoid} from 'nanoid';
 import {offersСatalog} from './offers.js';
