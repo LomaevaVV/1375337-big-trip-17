@@ -3,8 +3,8 @@ import EventView from '../view/event-view.js';
 import EventEditView from '../view/event-edit-view.js';
 import SortView from '../view/sort-view.js';
 import NoEventsMsg from '../view/no-event-view.js';
-import {render} from '../render.js';
-import {isEscEvent} from '../utils.js';
+import {render, replace} from '../framework/render.js';
+import {isEscEvent} from '../utils/common.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
@@ -14,10 +14,13 @@ export default class BoardPresenter {
 
   #boardEvents = [];
 
-  init = (boardContainer, eventsModel) => {
+  constructor(boardContainer, eventsModel) {
     this.#eventsModel = eventsModel;
-    this.#boardEvents = [...this.#eventsModel.events];
     this.#boardContainer = boardContainer;
+  }
+
+  init = () => {
+    this.#boardEvents = [...this.#eventsModel.events];
 
     this.#renderEventBoard();
   };
@@ -38,11 +41,12 @@ export default class BoardPresenter {
     const eventEditComponent = new EventEditView(event);
 
     const replaceEventToForm = () => {
-      this.#eventsListComponent.element.replaceChild(eventEditComponent.element, eventComponent.element);
+      replace(eventEditComponent, eventComponent);
     };
 
     const replaceFormToEvent = () => {
-      this.#eventsListComponent.element.replaceChild(eventComponent.element, eventEditComponent.element);
+      replace(eventComponent, eventEditComponent);
+
     };
 
     const onEventEditKeydown = (evt) => {
@@ -53,26 +57,20 @@ export default class BoardPresenter {
       }
     };
 
-    const onEventEditClick = (evt) => {
-      evt.preventDefault();
-      replaceFormToEvent();
-      document.removeEventListener('keydown', onEventEditKeydown);
-    };
-
-    const onEventEditSubmit = (evt) => {
-      evt.preventDefault();
-      replaceFormToEvent();
-      document.removeEventListener('keydown', onEventEditKeydown);
-    };
-
-    eventComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+    eventComponent.setEditClickHandler(() => {
       replaceEventToForm();
       document.addEventListener('keydown', onEventEditKeydown);
     });
 
-    eventEditComponent.element.querySelector('.event__rollup-btn').addEventListener('click', onEventEditClick);
+    eventEditComponent.setEditClickHandler(() => {
+      replaceFormToEvent();
+      document.removeEventListener('keydown', onEventEditKeydown);
+    });
 
-    eventEditComponent.element.querySelector('form').addEventListener('submit', onEventEditSubmit);
+    eventEditComponent.setFormSubmitHandler(() => {
+      replaceFormToEvent();
+      document.removeEventListener('keydown', onEventEditKeydown);
+    });
 
     render(eventComponent, this.#eventsListComponent.element);
   };

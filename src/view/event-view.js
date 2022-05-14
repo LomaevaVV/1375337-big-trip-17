@@ -1,5 +1,5 @@
-import {createElement} from '../render.js';
-import {humanizeEventDate, calculateDateDif} from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
+import {humanizeEventDate, calculateDateDif} from '../utils/event.js';
 
 const createOfferTemplate = ({title, price}) => (
   `<li class="event__offer">
@@ -65,11 +65,11 @@ const createEventTemplate = (event) => {
   );
 };
 
-export default class EventView {
+export default class EventView extends AbstractView {
   #event = null;
-  #element = null;
 
   constructor(event) {
+    super();
     this.#event = event;
   }
 
@@ -77,15 +77,13 @@ export default class EventView {
     return createEventTemplate(this.#event);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setEditClickHandler = (callback) => {
+    this._callback.editClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+  };
 
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.editClick();
+  };
 }
