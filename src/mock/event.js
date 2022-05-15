@@ -24,7 +24,7 @@ const generateDestination = () => ({
 
 export const generateEvent = () => {
   const type = getRandomArrayElement(POINT_TYPES);
-  const timeHourFrom = (dayjs('2019-07-11T11:22:13').add(getRandomNumber(1,100000), 'minute')).toString();
+  const timeHourFrom = (dayjs('2022-04-25T11:22:13').add(getRandomNumber(1,100000), 'minute')).toString();
 
   const AvailableOffers = offersСatalog.find(
     (offer) => offer.type === type

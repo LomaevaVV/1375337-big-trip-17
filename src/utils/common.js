@@ -1,6 +1,4 @@
-const ESC_ALL_BROWSERS = 'Escape';
-
-export const isEscEvent = (evt) => evt.key === ESC_ALL_BROWSERS;
+export const isEscEvent = (evt) => evt.key === 'Esc' || 'Escape';
 
 export const getRandomNumber = (min, max) => {
   if (min < max && min >= 0) {
