@@ -13,7 +13,6 @@ const siteEvents = document.querySelector('.trip-events');
 const eventsModel = new EventsModel();
 const boardPresenter = new BoardPresenter(siteEvents, eventsModel);
 const filters = generateFilter(eventsModel.events);
-window.console.log(filters);
 
 render(new TripInfoView(), siteHeader, RenderPosition.AFTERBEGIN);
 render(new FilterView(filters), siteFilter);
