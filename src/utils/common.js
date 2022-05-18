@@ -1,4 +1,4 @@
-export const isEscEvent = (evt) => evt.key === 'Escape';
+export const isEscEvent = (evt) => evt.key === 'Esc' || evt.key === 'Escape';
 
 export const getRandomNumber = (min, max) => {
   if (min < max && min >= 0) {
