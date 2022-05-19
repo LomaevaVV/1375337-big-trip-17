@@ -4,7 +4,7 @@ const createNoEventsMsg = () => (
   '<p class="trip-events__msg">Click New Event to create your first point</p>'
 );
 
-export default class NoEventsMsg extends AbstractView {
+export default class NoEventsView extends AbstractView {
   get template() {
     return createNoEventsMsg();
   }

@@ -1,4 +1,4 @@
-export const isEscEvent = (evt) => evt.key === 'Esc' || 'Escape';
+export const isEscEvent = (evt) => evt.key === 'Esc' || evt.key === 'Escape';
 
 export const getRandomNumber = (min, max) => {
   if (min < max && min >= 0) {
@@ -25,4 +25,18 @@ export const getShuffleArraySlice = (arrayInput) => {
   const arrayOutput = shuffle(arrayInput);
 
   return arrayOutput.slice(arrayLength);
+};
+
+export const updateItem = (items, update) => {
+  const index = items.findIndex((item) => item.id === update.id);
+
+  if (index === -1) {
+    return items;
+  }
+
+  return [
+    ...items.slice(0, index),
+    update,
+    ...items.slice(index + 1),
+  ];
 };
