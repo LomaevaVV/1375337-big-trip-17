@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 
 import {SORT_TYPES} from '../constants.js';
 
-const dateCompare = (eventA, eventB) => dayjs(eventB.dateFrom) - dayjs(eventA.dateFrom);
+const dateCompare = (eventA, eventB) => dayjs(eventA.dateFrom) - dayjs(eventB.dateFrom);
 
 const timeCompare = (eventA, eventB) => {
   const timeA = dayjs(eventA.dateTo).diff(dayjs(eventA.dateFrom));
