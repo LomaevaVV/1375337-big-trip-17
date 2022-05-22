@@ -15,3 +15,9 @@ export const FILTER_TYPES = {
   FUTURE: 'Future',
   PAST: 'Past'
 };
+
+export const SORT_TYPES = {
+  DAY: 'sort-day',
+  PRICE: 'sort-ptice',
+  TIME: 'sort-time'
+};
