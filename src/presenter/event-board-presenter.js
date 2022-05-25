@@ -29,7 +29,7 @@ export default class BoardPresenter {
     this.#boardEvents = [...this.#eventsModel.events];
     this.#boardEvents = getSortedEventsbyDate(this.#boardEvents);
 
-    this.#sourcedBoardEvents = [...this.#eventsModel.events];
+    this.#sourcedBoardEvents = [...this.#boardEvents];
 
     this.#renderEventBoard();
   };

@@ -1,6 +1,56 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {humanizeEventDate} from '../utils/event.js';
 import {offersСatalog} from '../mock/offers.js';
+import {destinationsСatalog} from '../mock/destinations.js';
+import {POINT_TYPES} from '../constants.js';
+
+const NEW_EVENT = {
+  basePrice: 0,
+  dateFrom: null,
+  dateTo: null,
+  destination: {
+    description: '',
+    name: '',
+    pictures: []
+  },
+  isFavorite: false,
+  offers: [],
+  type: ''
+};
+
+const createDestinationsListTemplate = (destinations) => (
+  `
+    ${destinations.map((destination) => `<option value="${destination.name}"></option>`).join('')}
+  `
+);
+
+const createTypeItemTemplate = (type, selectedType) => (
+  `<div class="event__type-item">
+    <input
+      id="event-type-${type.toLowerCase()}-1"
+      class="event__type-input
+      visually-hidden"
+      type="radio"
+      name="event-type"
+      value="${type.toLowerCase()}"
+      ${type === selectedType? 'checked' : ''}
+    >
+    <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-1">${type}</label>
+  </div>`
+);
+
+const createTypeListTemplate = (availableTypes, selectedType) => {
+  const typeItemsTemplate = availableTypes
+    .map((type) => createTypeItemTemplate(type, selectedType))
+    .join('');
+
+  return (
+    `<fieldset class="event__type-group">
+      <legend class="visually-hidden">Event type</legend>
+      ${typeItemsTemplate}
+    </fieldset>`
+  );
+};
 
 const getOffersByType = (type) => offersСatalog.find((offer) => offer.type === type);
 
@@ -48,7 +98,7 @@ const createPicturesTemplate = (pictures) => (
   pictures.map(({src, description}) => `<img class="event__photo" src="${src}" alt="${description}">`).join('')
 );
 
-const createDestinationsTemplate = (destination) => {
+const createDestinationTemplate = (destination) => {
   if (!destination) {
     return  '';
   }
@@ -81,8 +131,10 @@ const createEventEditTemplate = (event) => {
 
   const availableOffers = getOffersByType(type)?.offers||[];
 
+  const typesTemplate = createTypeListTemplate(POINT_TYPES, type);
   const offersTemplate = createOffersTemplate(availableOffers, offers);
-  const destinationsTemplate = createDestinationsTemplate(destination);
+  const destinationTemplate = createDestinationTemplate(destination);
+  const destionationsListTemplate = createDestinationsListTemplate(destinationsСatalog);
 
   return (
     `<li class="trip-events__item">
@@ -96,10 +148,7 @@ const createEventEditTemplate = (event) => {
             <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
             <div class="event__type-list">
-              <fieldset class="event__type-group">
-                <legend class="visually-hidden">Event type</legend>
-
-              </fieldset>
+              ${typesTemplate}
             </div>
           </div>
 
@@ -107,11 +156,9 @@ const createEventEditTemplate = (event) => {
             <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="Chamonix" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
             <datalist id="destination-list-1">
-              <option value="Amsterdam"></option>
-              <option value="Geneva"></option>
-              <option value="Chamonix"></option>
+              ${destionationsListTemplate}
             </datalist>
           </div>
 
@@ -139,23 +186,26 @@ const createEventEditTemplate = (event) => {
         </header>
         <section class="event__details">
           ${offersTemplate}
-          ${destinationsTemplate}
+          ${destinationTemplate}
         </section>
       </form>
     </li>`
   );
 };
 
-export default class EventEditView extends AbstractView {
-  #event = null;
-
-  constructor(event) {
+export default class EventEditView extends AbstractStatefulView {
+  constructor(event = NEW_EVENT) {
     super();
-    this.#event = event;
+    this._state = EventEditView.parseTaskToState(event);
+
+    this.element.querySelector('.event__type-list')
+      .addEventListener('click', this.#eventTypeToggleHandler);
+    this.element.querySelector('#destination-list-1')
+      .addEventListener('click', this.#destinationNameToggleHandler);
   }
 
   get template() {
-    return createEventEditTemplate(this.#event);
+    return createEventEditTemplate(this._state);
   }
 
   setFormSubmitHandler = (callback) => {
@@ -165,7 +215,7 @@ export default class EventEditView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmit(this.#event);
+    this._callback.formSubmit(EventEditView.parseStateToTask(this._state));
   };
 
   setEditClickHandler = (callback) => {
@@ -177,4 +227,22 @@ export default class EventEditView extends AbstractView {
     evt.preventDefault();
     this._callback.editClick();
   };
+
+  #eventTypeToggleHandler = (evt) => {
+    evt.preventDefault();
+    // this.updateElement({
+    //   isDueDate: !this._state.isDueDate,
+    // });
+  };
+
+  #destinationNameToggleHandler = (evt) => {
+    evt.preventDefault();
+    // this.updateElement({
+    //   isRepeating: !this._state.isRepeating,
+    // });
+  };
+
+  static parseTaskToState = (event) => ({...event});
+
+  static parseStateToTask = (state) => ({...state});
 }
