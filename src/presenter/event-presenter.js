@@ -41,6 +41,7 @@ export default class EventPresenter {
 
     this.#eventComponent.setEditClickHandler(() => {
       this.#replaceEventToForm();
+      this.#eventEditComponent.reset(this.#event);
       document.addEventListener('keydown',  this.#onEventEditKeydown);
     });
 
@@ -79,6 +80,7 @@ export default class EventPresenter {
 
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#eventEditComponent.reset(this.#event);
       this.#replaceFormToEvent();
     }
   };
@@ -97,6 +99,7 @@ export default class EventPresenter {
   #onEventEditKeydown = (evt) => {
     if (isEscEvent(evt)) {
       evt.preventDefault();
+      this.#eventEditComponent.reset(this.#event);
       this.#replaceFormToEvent();
       document.removeEventListener('keydown', this.#onEventEditKeydown);
     }

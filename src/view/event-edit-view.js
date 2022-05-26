@@ -178,7 +178,7 @@ const createEventEditTemplate = (event) => {
             <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+          <button class="event__save-btn  btn  btn--blue" type="submit"  ${!destination.name? 'disabled' : ''}>Save</button>
           <button class="event__reset-btn" type="reset">Delete</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
@@ -198,15 +198,24 @@ export default class EventEditView extends AbstractStatefulView {
     super();
     this._state = EventEditView.parseTaskToState(event);
 
-    this.element.querySelector('.event__type-list')
-      .addEventListener('click', this.#eventTypeToggleHandler);
-    this.element.querySelector('#destination-list-1')
-      .addEventListener('click', this.#destinationNameToggleHandler);
+    this.#setInnerHandlers();
   }
 
   get template() {
     return createEventEditTemplate(this._state);
   }
+
+  reset = (event) => {
+    this.updateElement(
+      EventEditView.parseTaskToState(event),
+    );
+  };
+
+  _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setEditClickHandler(this._callback.editClick);
+  };
 
   setFormSubmitHandler = (callback) => {
     this._callback.formSubmit = callback;
@@ -230,16 +239,70 @@ export default class EventEditView extends AbstractStatefulView {
 
   #eventTypeToggleHandler = (evt) => {
     evt.preventDefault();
-    // this.updateElement({
-    //   isDueDate: !this._state.isDueDate,
-    // });
+
+    this.updateElement({
+      offers: [],
+      type: evt.target.innerText,
+    });
   };
 
   #destinationNameToggleHandler = (evt) => {
     evt.preventDefault();
-    // this.updateElement({
-    //   isRepeating: !this._state.isRepeating,
-    // });
+    const enteredDestination = destinationsСatalog.find((destination) => destination.name === evt.target.value);
+
+    this.updateElement({
+      destination: {
+        name: enteredDestination ? enteredDestination.name : '',
+        description: enteredDestination ? enteredDestination.description : '',
+        pictures: enteredDestination ? [...enteredDestination.pictures] : [],
+      }
+    });
+  };
+
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    this.updateElement({
+      basePrice: evt.target.value,
+    });
+  };
+
+  #offersClickHandler = (evt) => {
+    if (evt.target.tagName !== 'INPUT') {
+      return;
+    }
+
+    evt.preventDefault();
+    const offersByTipe = getOffersByType(this._state.type).offers;
+    const offerClicked = offersByTipe.find((offer) => offer.id === Number(evt.target.value));
+    const oldSelectedOffers = [...this._state.offers];
+    let newSelectedOffers = [];
+
+    if (evt.target.checked) {
+      newSelectedOffers = [...this._state.offers, offerClicked];
+    } else {
+      const offerClickedIndex = this._state.offers.indexOf(offerClicked);
+      oldSelectedOffers.splice(offerClickedIndex, 1);
+      newSelectedOffers = oldSelectedOffers;
+    }
+
+    this.updateElement({
+      offers: newSelectedOffers,
+    });
+  };
+
+  #setInnerHandlers = () => {
+    this.element.querySelector('.event__type-list')
+      .addEventListener('click', this.#eventTypeToggleHandler);
+    this.element.querySelector('.event__input--destination')
+      .addEventListener('change', this.#destinationNameToggleHandler);
+    this.element.querySelector('.event__input--price')
+      .addEventListener('change', this.#priceChangeHandler);
+
+    if (getOffersByType(this._state.type)) {
+      this.element.querySelector('.event__available-offers')
+        .addEventListener('click', this.#offersClickHandler);
+    }
   };
 
   static parseTaskToState = (event) => ({...event});
