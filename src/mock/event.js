@@ -1,14 +1,12 @@
 import {getRandomNumber, getRandomArrayElement, getShuffleArraySlice} from '../utils/common.js';
 import dayjs from 'dayjs';
 import {nanoid} from 'nanoid';
-import {offersСatalog} from './offers.js';
 import {POINT_TYPES} from '../constants.js';
-import {destinationsСatalog} from './destinations.js';
 
 const PRICE_MIN = 100;
 const PRICE_MAX = 1500;
 
-export const generateEvent = () => {
+export const generateEvent = (destinationsСatalog, offersСatalog) => {
   const type = getRandomArrayElement(POINT_TYPES);
   const timeHourFrom = (dayjs('2022-04-25T11:22:13').add(getRandomNumber(1,100000), 'minute')).toString();
 
@@ -20,6 +18,9 @@ export const generateEvent = () => {
     getShuffleArraySlice(AvailableOffers.offers)
     : [];
 
+  const selectedoffers = [];
+  selectedOffers.forEach((offer) => selectedoffers.push(offer.id));
+
   return ({
     basePrice: getRandomNumber(PRICE_MIN, PRICE_MAX),
     dateFrom: timeHourFrom,
@@ -27,7 +28,7 @@ export const generateEvent = () => {
     destination: getRandomArrayElement(destinationsСatalog),
     id: nanoid(),
     isFavorite: Boolean(getRandomNumber(0, 1)),
-    offers: selectedOffers,
+    offers: selectedoffers,
     type: type,
   });
 };

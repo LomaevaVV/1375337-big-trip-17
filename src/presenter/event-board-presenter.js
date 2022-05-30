@@ -10,6 +10,8 @@ import {getSortedEvents, getSortedEventsbyDate} from '../utils/sort.js';
 export default class BoardPresenter {
   #boardContainer = null;
   #eventsModel = null;
+  #destinationsCatalog = null;
+  #offersCatalog = null;
   #currentSortType = SORT_TYPES.DAY;
 
   #eventsListComponent = new EventsListView();
@@ -20,9 +22,11 @@ export default class BoardPresenter {
   #sourcedBoardEvents = [];
   #eventPresenter = new Map();
 
-  constructor(boardContainer, eventsModel) {
+  constructor(boardContainer, eventsModel, destinationsCatalog, offersCatalog) {
     this.#eventsModel = eventsModel;
     this.#boardContainer = boardContainer;
+    this.#destinationsCatalog = destinationsCatalog;
+    this.#offersCatalog = offersCatalog;
   }
 
   init = () => {
@@ -82,7 +86,7 @@ export default class BoardPresenter {
   };
 
   #renderEvent = (event)  => {
-    const eventPresenter = new EventPresenter(this.#eventsListComponent.element, this.#handleEventChange, this.#handleModeChange);
+    const eventPresenter = new EventPresenter(this.#eventsListComponent.element, this.#handleEventChange, this.#handleModeChange, this.#destinationsCatalog, this.#offersCatalog);
     eventPresenter.init(event);
     this.#eventPresenter.set(event.id, eventPresenter);
   };

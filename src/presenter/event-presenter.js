@@ -12,17 +12,22 @@ export default class EventPresenter {
   #eventsListContainer = null;
   #changeData = null;
   #changeMode = null;
+  #destinationsCatalog = null;
+  #offersCatalog = null;
 
   #eventComponent = null;
   #eventEditComponent = null;
 
+
   #event = null;
   #mode = Mode.DEFAULT;
 
-  constructor(eventsListContainer, changeData, changeMode)  {
+  constructor(eventsListContainer, changeData, changeMode, destinationsCatalog, offersCatalog) {
     this.#eventsListContainer = eventsListContainer;
     this.#changeData = changeData;
     this.#changeMode = changeMode;
+    this.#destinationsCatalog = destinationsCatalog;
+    this.#offersCatalog = offersCatalog;
   }
 
   init = (event) => {
@@ -31,8 +36,8 @@ export default class EventPresenter {
     const prevEventComponent = this.#eventComponent;
     const prevEventEditComponent = this.#eventEditComponent;
 
-    this.#eventComponent = new EventView(event);
-    this.#eventEditComponent = new EventEditView(event);
+    this.#eventComponent = new EventView(event, this.#offersCatalog);
+    this.#eventEditComponent = new EventEditView(this.#event, this.#destinationsCatalog, this.#offersCatalog);
 
 
     this.#eventComponent.setFavoriteClickHandler(() => {
@@ -42,18 +47,15 @@ export default class EventPresenter {
     this.#eventComponent.setEditClickHandler(() => {
       this.#replaceEventToForm();
       this.#eventEditComponent.reset(this.#event);
-      document.addEventListener('keydown',  this.#onEventEditKeydown);
     });
 
     this.#eventEditComponent.setEditClickHandler(() => {
       this.#replaceFormToEvent();
-      document.removeEventListener('keydown',  this.#onEventEditKeydown);
     });
 
     this.#eventEditComponent.setFormSubmitHandler((updatedEvent) => {
       this.#changeData(updatedEvent);
       this.#replaceFormToEvent();
-      document.removeEventListener('keydown',  this.#onEventEditKeydown);
     });
 
     if (prevEventComponent === null || prevEventEditComponent === null) {
@@ -87,12 +89,14 @@ export default class EventPresenter {
 
   #replaceEventToForm = () => {
     replace(this.#eventEditComponent, this.#eventComponent);
+    document.addEventListener('keydown',  this.#onEventEditKeydown);
     this.#changeMode();
     this.#mode = Mode.EDITING;
   };
 
   #replaceFormToEvent = () => {
     replace(this.#eventComponent, this.#eventEditComponent);
+    document.removeEventListener('keydown', this.#onEventEditKeydown);
     this.#mode = Mode.DEFAULT;
   };
 
@@ -101,7 +105,6 @@ export default class EventPresenter {
       evt.preventDefault();
       this.#eventEditComponent.reset(this.#event);
       this.#replaceFormToEvent();
-      document.removeEventListener('keydown', this.#onEventEditKeydown);
     }
   };
 }

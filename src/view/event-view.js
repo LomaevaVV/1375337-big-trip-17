@@ -1,5 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {humanizeEventDate, calculateDateDif} from '../utils/event.js';
+import {getOffersByType} from '../utils/offers.js';
 
 const createOfferTemplate = ({title, price}) => (
   `<li class="event__offer">
@@ -9,13 +10,15 @@ const createOfferTemplate = ({title, price}) => (
   </li>`
 );
 
-const getOffersTemplate = (offers) => (
-  offers
-    .map((offer) => createOfferTemplate(offer))
-    .join('')
-);
+const getOffersTemplate = (availableOffers, offers) => {
+  const selectedOffers = availableOffers.filter((offer) => offers.includes(offer.id));
 
-const createEventTemplate = (event) => {
+  return selectedOffers
+    .map((offer) => createOfferTemplate(offer))
+    .join('');
+};
+
+const createEventTemplate = (event, offersCatalog) => {
   const {
     basePrice,
     dateFrom,
@@ -26,6 +29,7 @@ const createEventTemplate = (event) => {
     type
   } = event;
 
+  const availableOffers = getOffersByType(offersCatalog, type)?.offers || [];
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
   return (
@@ -49,7 +53,7 @@ const createEventTemplate = (event) => {
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-        ${getOffersTemplate(offers)}
+        ${getOffersTemplate(availableOffers, offers)}
       </ul>
       <button class="event__favorite-btn ${favoriteClass}" type="button">
         <span class="visually-hidden">Add to favorite</span>
@@ -67,14 +71,16 @@ const createEventTemplate = (event) => {
 
 export default class EventView extends AbstractView {
   #event = null;
+  #offersCatalog = null;
 
-  constructor(event) {
+  constructor(event, offersCatalog) {
     super();
     this.#event = event;
+    this.#offersCatalog = offersCatalog;
   }
 
   get template() {
-    return createEventTemplate(this.#event);
+    return createEventTemplate(this.#event, this.#offersCatalog);
   }
 
   setEditClickHandler = (callback) => {
