@@ -16,6 +16,6 @@ const eventsModel = new EventsModel(destinationsСatalog, offersСatalog);
 const boardPresenter = new BoardPresenter(siteEvents, eventsModel, destinationsСatalog, offersСatalog);
 const filters = generateFilter(eventsModel.events);
 
-render(new TripInfoView(), siteHeader, RenderPosition.AFTERBEGIN);
+render(new TripInfoView(eventsModel.events), siteHeader, RenderPosition.AFTERBEGIN);
 render(new FilterView(filters), siteFilter);
 boardPresenter.init();
