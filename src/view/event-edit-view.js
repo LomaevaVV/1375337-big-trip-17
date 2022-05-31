@@ -2,6 +2,9 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {humanizeEventDate} from '../utils/event.js';
 import {POINT_TYPES} from '../constants.js';
 import {getOffersByType} from '../utils/offers.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 const NEW_EVENT = {
   basePrice: 0,
@@ -131,6 +134,7 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
   const offersTemplate = createOffersTemplate(availableOffers, offers);
   const destinationTemplate = createDestinationTemplate(destination);
   const destionationsListTemplate = createDestinationsListTemplate(destinationsСatalog);
+  const isSubmitDisabled = !basePrice || !dateFrom || !dateTo || !type || !destination.name;
 
   return (
     `<li class="trip-events__item">
@@ -200,7 +204,7 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
             >
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit"  ${!destination.name ? 'disabled' : ''}>Save</button>
+          <button class="event__save-btn  btn  btn--blue" type="submit"  ${isSubmitDisabled ? 'disabled' : ''}>Save</button>
           <button class="event__reset-btn" type="reset">Delete</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
@@ -218,6 +222,8 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
 export default class EventEditView extends AbstractStatefulView {
   #destinationsCatalog = null;
   #offersCatalog = null;
+  #dateFromPicker = null;
+  #dateToPicker = null;
 
   constructor(event = NEW_EVENT, destinationsCatalog, offersCatalog) {
     super();
@@ -226,11 +232,27 @@ export default class EventEditView extends AbstractStatefulView {
     this.#offersCatalog = offersCatalog;
 
     this.#setInnerHandlers();
+    this.#setDateFromPicker();
+    this.#setDateToPicker();
   }
 
   get template() {
     return createEventEditTemplate(this._state, this.#destinationsCatalog, this.#offersCatalog);
   }
+
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#dateFromPicker) {
+      this.#dateFromPicker.destroy();
+      this.#dateFromPicker = null;
+    }
+
+    if (this.#dateToPicker) {
+      this.#dateToPicker.destroy();
+      this.#dateToPicker = null;
+    }
+  };
 
   reset = (event) => {
     this.updateElement(EventEditView.parseEventToState(event));
@@ -238,6 +260,8 @@ export default class EventEditView extends AbstractStatefulView {
 
   _restoreHandlers = () => {
     this.#setInnerHandlers();
+    this.#setDateFromPicker();
+    this.#setDateToPicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setEditClickHandler(this._callback.editClick);
   };
@@ -284,6 +308,18 @@ export default class EventEditView extends AbstractStatefulView {
     });
   };
 
+  #dueDateFromChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateFrom: userDate,
+    });
+  };
+
+  #dueDateToChangeHandler = ([userDate]) => {
+    this.updateElement({
+      dateTo: userDate,
+    });
+  };
+
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
 
@@ -312,6 +348,34 @@ export default class EventEditView extends AbstractStatefulView {
     this.updateElement({
       offers: newSelectedOffers,
     });
+  };
+
+  #setDateFromPicker = () => {
+    if (this._state.dateFrom) {
+      this.#dateFromPicker = flatpickr(
+        this.element.querySelector('input[name="event-start-time"]'),
+        {
+          dateFormat: 'd/m/y H:i',
+          defaultDate: this._state.dateFrom,
+          enableTime: true,
+          onChange: this.#dueDateFromChangeHandler,
+        },
+      );
+    }
+  };
+
+  #setDateToPicker = () => {
+    if (this._state.dateTo) {
+      this.#dateToPicker = flatpickr(
+        this.element.querySelector('input[name="event-end-time"]'),
+        {
+          dateFormat: 'd/m/y H:i',
+          defaultDate: this._state.dateTo,
+          enableTime: true,
+          onChange: this.#dueDateToChangeHandler,
+        },
+      );
+    }
   };
 
   #setInnerHandlers = () => {
