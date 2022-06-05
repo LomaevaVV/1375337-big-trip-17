@@ -6,11 +6,7 @@ const createTripInfoTemplate = (events) => {
   const sortedEvents = getSortedEventsbyDate(events);
   const startDate = sortedEvents[0].dateFrom;
   const endDate = sortedEvents[sortedEvents.length - 1].dateTo;
-  let tripCost = 0;
-
-  for (let i = 0; i < events.length; i++) {
-    tripCost += events[i].basePrice;
-  }
+  const tripCost = events.reduce((acc, cur) => acc + cur.basePrice, 0);
 
   return (
     `<section class="trip-main__trip-info  trip-info">

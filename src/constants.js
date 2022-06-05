@@ -11,13 +11,25 @@ export const POINT_TYPES = [
 ];
 
 export const FILTER_TYPES = {
-  EVERYTHING: 'Everything',
-  FUTURE: 'Future',
-  PAST: 'Past'
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PAST: 'past'
 };
 
 export const SORT_TYPES = {
   DAY: 'sort-day',
-  PRICE: 'sort-ptice',
+  PRICE: 'sort-price',
   TIME: 'sort-time'
+};
+
+export const USER_ACTION = {
+  UPDATE_EVENT: 'UPDATE_EVENT',
+  ADD_EVENT: 'ADD_EVENT',
+  DELETE_EVENT: 'DELETE_EVENT',
+};
+
+export const UPDATE_TYPE = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
 };

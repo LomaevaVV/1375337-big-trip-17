@@ -2,6 +2,7 @@ import {render, replace, remove} from '../framework/render.js';
 import EventView from '../view/event-view.js';
 import EventEditView from '../view/event-edit-view.js';
 import {isEscEvent} from '../utils/common.js';
+import {USER_ACTION, UPDATE_TYPE} from '../constants.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -37,11 +38,15 @@ export default class EventPresenter {
     const prevEventEditComponent = this.#eventEditComponent;
 
     this.#eventComponent = new EventView(event, this.#offersCatalog);
-    this.#eventEditComponent = new EventEditView(this.#event, this.#destinationsCatalog, this.#offersCatalog);
+    this.#eventEditComponent = new EventEditView(this.#destinationsCatalog, this.#offersCatalog, this.#event);
 
 
     this.#eventComponent.setFavoriteClickHandler(() => {
-      this.#changeData({...this.#event, isFavorite: !this.#event.isFavorite});
+      this.#changeData(
+        USER_ACTION.UPDATE_EVENT,
+        UPDATE_TYPE.MINOR,
+        {...this.#event, isFavorite: !this.#event.isFavorite},
+      );
     });
 
     this.#eventComponent.setEditClickHandler(() => {
@@ -53,10 +58,9 @@ export default class EventPresenter {
       this.#replaceFormToEvent();
     });
 
-    this.#eventEditComponent.setFormSubmitHandler((updatedEvent) => {
-      this.#changeData(updatedEvent);
-      this.#replaceFormToEvent();
-    });
+    this.#eventEditComponent.setFormSubmitHandler(this.#handleFormSubmit);
+
+    this.#eventEditComponent.setDeleteClickHandler(this.#handleDeleteClick);
 
     if (prevEventComponent === null || prevEventEditComponent === null) {
       render(this.#eventComponent, this.#eventsListContainer);
@@ -106,5 +110,27 @@ export default class EventPresenter {
       this.#eventEditComponent.reset(this.#event);
       this.#replaceFormToEvent();
     }
+  };
+
+  #handleFormSubmit = (updatedEvent) => {
+    // Проверяем, поменялись ли в задаче данные, которые попадают под фильтрацию,
+    // а значит требуют перерисовки списка - если таких нет, это PATCH-обновление
+    const isMajorUpdate = this.#event.destination.name !== updatedEvent.destination.name || this.#event.basePrice !== updatedEvent.basePrice;
+
+    this.#changeData(
+      USER_ACTION.UPDATE_EVENT,
+      isMajorUpdate ? UPDATE_TYPE.MAJOR : UPDATE_TYPE.MINOR,
+      updatedEvent,
+    );
+    this.#replaceFormToEvent();
+  };
+
+  #handleDeleteClick = (event) => {
+    this.#changeData(
+      USER_ACTION.DELETE_EVENT,
+      UPDATE_TYPE.MINOR,
+      event,
+    );
+    this.#replaceFormToEvent();
   };
 }

@@ -1,60 +1,114 @@
+import {render, RenderPosition, remove} from '../framework/render.js';
+
 import EventsListView from '../view/events-list-view.js';
 import SortView from '../view/sort-view.js';
 import NoEventsView from '../view/no-event-view.js';
-import {render} from '../framework/render.js';
+
 import EventPresenter from './event-presenter.js';
-import {updateItem} from '../utils/common.js';
-import {SORT_TYPES} from '../constants.js';
+import EventNewPresenter from './event-new-presenter.js';
+
+import {USER_ACTION, UPDATE_TYPE, FILTER_TYPES, SORT_TYPES} from '../constants.js';
 import {getSortedEvents, getSortedEventsbyDate} from '../utils/sort.js';
+import {filter} from '../utils/filter.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
   #eventsModel = null;
+  #filterModel = null;
   #destinationsCatalog = null;
   #offersCatalog = null;
   #currentSortType = SORT_TYPES.DAY;
+  #filterType = FILTER_TYPES.EVERYTHING;
 
   #eventsListComponent = new EventsListView();
-  #sortComponent = new SortView();
-  #noEventsComponent = new NoEventsView();
+  #noEventsComponent = null;
+  #sortComponent = null;
+  #eventNewPresenter = null;
 
-  #boardEvents = [];
-  #sourcedBoardEvents = [];
   #eventPresenter = new Map();
 
-  constructor(boardContainer, eventsModel, destinationsCatalog, offersCatalog) {
+  constructor(boardContainer, eventsModel, destinationsCatalog, offersCatalog, filterModel) {
     this.#eventsModel = eventsModel;
     this.#boardContainer = boardContainer;
     this.#destinationsCatalog = destinationsCatalog;
     this.#offersCatalog = offersCatalog;
+    this.#filterModel = filterModel;
+
+    this.#eventNewPresenter = new EventNewPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.#destinationsCatalog, this.#offersCatalog);
+
+    this.#eventsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
+  }
+
+  get events() {
+    this.#filterType = this.#filterModel.filter;
+    const events = this.#eventsModel.events;
+    const filteredEvents = filter[this.#filterType](events);
+
+    switch (this.#currentSortType) {
+      case SORT_TYPES.DAY:
+        return getSortedEventsbyDate(filteredEvents);
+      case SORT_TYPES.PRICE:
+        return getSortedEvents(SORT_TYPES.PRICE, filteredEvents);
+      case SORT_TYPES.TIME:
+        return getSortedEvents(SORT_TYPES.TIME, filteredEvents);
+    }
+
+    return filteredEvents;
   }
 
   init = () => {
-    this.#boardEvents = [...this.#eventsModel.events];
-    this.#boardEvents = getSortedEventsbyDate(this.#boardEvents);
-
-    this.#sourcedBoardEvents = [...this.#boardEvents];
-
     this.#renderEventBoard();
   };
 
+  createEvent = () => {
+    this.#eventNewPresenter.init();
+  };
+
   #handleModeChange = () => {
+    this.#eventNewPresenter.destroy();
     this.#eventPresenter.forEach((presenter) => presenter.resetView());
   };
 
-  #handleEventChange = (updatedEvent) => {
-    this.#boardEvents = updateItem(this.#boardEvents, updatedEvent);
-    this.#sourcedBoardEvents = updateItem(this.#sourcedBoardEvents, updatedEvent);
-    this.#eventPresenter.get(updatedEvent.id).init(updatedEvent);
+  #handleViewAction = (actionType, updateType, updatedEvent) => {
+    // Здесь будем вызывать обновление модели.
+    // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
+    // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
+    // update - обновленные данные
+    switch (actionType) {
+      case USER_ACTION.UPDATE_EVENT:
+        this.#eventsModel.updateEvent(updateType, updatedEvent);
+        break;
+      case USER_ACTION.ADD_EVENT:
+        this.#eventsModel.addEvent(updateType, updatedEvent);
+        break;
+      case USER_ACTION.DELETE_EVENT:
+        this.#eventsModel.deleteEvent(updateType, updatedEvent);
+        break;
+    }
   };
 
-  #sortEvents = (sortType) => {
-    if (sortType === SORT_TYPES.DAY) {
-      this.#boardEvents = [...this.#sourcedBoardEvents];
-    } else {
-      this.#boardEvents = getSortedEvents(sortType, this.#boardEvents);
+  #handleModelEvent = (updateType, data) => {
+    // В зависимости от типа изменений решаем, что делать:
+    // - обновить часть списка (например, когда поменялось описание)
+    // - обновить список (например, когда задача ушла в архив)
+    // - обновить всю доску (например, при переключении фильтра)
+    switch (updateType) {
+      case UPDATE_TYPE.PATCH:
+        // - обновить часть списка (например, когда поменялось описание)
+        this.#eventPresenter.get(data.id).init(data);
+        break;
+      case UPDATE_TYPE.MINOR:
+        // - обновить список (например, когда задача ушла в архив)
+        this.#clearEventBoard();
+        this.#renderEventBoard();
+        break;
+      case UPDATE_TYPE.MAJOR:
+        // - обновить всю доску (например, при переключении фильтра)
+        this.#clearEventBoard();
+        this.#renderEventBoard();
+        break;
     }
-    this.#currentSortType = sortType;
   };
 
   #handleSortTypeChange = (sortType) => {
@@ -62,42 +116,48 @@ export default class BoardPresenter {
       return;
     }
 
-    this.#sortEvents(sortType);
-    this.#clearEventList();
+    this.#currentSortType = sortType;
+    this.#clearEventBoard();
     this.#renderEventBoard();
   };
 
   #renderSort = () => {
-    render(this.#sortComponent, this.#boardContainer);
+    this.#sortComponent = new SortView(this.#currentSortType);
     this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
+
+    render(this.#sortComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
   };
 
   #renderNoEvents = () => {
+    this.#noEventsComponent = new NoEventsView(this.#filterType);
     render(this.#noEventsComponent, this.#boardContainer);
   };
 
-  #renderEventsList = () => {
-    render(this.#eventsListComponent, this.#boardContainer);
-  };
-
-  #clearEventList = () => {
-    this.#eventPresenter.forEach((presenter) => presenter.destroy());
-    this.#eventPresenter.clear();
-  };
-
   #renderEvent = (event)  => {
-    const eventPresenter = new EventPresenter(this.#eventsListComponent.element, this.#handleEventChange, this.#handleModeChange, this.#destinationsCatalog, this.#offersCatalog);
+    const eventPresenter = new EventPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.#handleModeChange, this.#destinationsCatalog, this.#offersCatalog);
     eventPresenter.init(event);
     this.#eventPresenter.set(event.id, eventPresenter);
   };
 
+  #clearEventBoard = () => {
+    this.#eventNewPresenter.destroy();
+    this.#eventPresenter.forEach((presenter) => presenter.destroy());
+    this.#eventPresenter.clear();
+
+    remove(this.#sortComponent);
+
+    if (this.#noEventsComponent) {
+      remove(this.#noEventsComponent);
+    }
+  };
+
   #renderEventBoard = () => {
-    if (this.#boardEvents.length === 0) {
+    if (this.events.length === 0) {
       this.#renderNoEvents();
     } else {
       this.#renderSort();
-      this.#renderEventsList();
-      this.#boardEvents.forEach(this.#renderEvent);
+      render(this.#eventsListComponent, this.#boardContainer);
+      this.events.forEach(this.#renderEvent);
     }
   };
 }

@@ -3,14 +3,18 @@ import dayjs from 'dayjs';
 import {nanoid} from 'nanoid';
 import {POINT_TYPES} from '../constants.js';
 import {humanizeEventDate} from '../utils/event.js';
+import {getDestinationsСatalog} from './destinations.js';
+import {getOffersCatalog} from './offers.js';
 
 const PRICE_MIN = 100;
 const PRICE_MAX = 1500;
 
-export const generateEvent = (destinationsСatalog, offersСatalog) => {
+export const generateEvent = () => {
+  const destinationsСatalog = getDestinationsСatalog();
+  const offersСatalog = getOffersCatalog();
   const type = getRandomArrayElement(POINT_TYPES);
   const timeHourFrom = (dayjs('2022-04-25T11:22:13').add(getRandomNumber(1,100000), 'minute')).toString();
-  const timeHourTo = dayjs(timeHourFrom).add(getRandomNumber(30, 2000), 'minute')
+  const timeHourTo = dayjs(timeHourFrom).add(getRandomNumber(30, 2000), 'minute');
   const AvailableOffers = offersСatalog.find(
     (offer) => offer.type === type
   );

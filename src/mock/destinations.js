@@ -4,7 +4,7 @@ const DESCRIPTION = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
 const PICTURE_ID_MIN = 1;
 const PICTURE_ID_MAX = 5;
 
-export const destinationsСatalog = [
+export const getDestinationsСatalog = () => [
   {
     name: 'Chamonix',
     description: getShuffleArraySlice(DESCRIPTION),
@@ -48,3 +48,5 @@ export const destinationsСatalog = [
     ]
   }
 ];
+
+export const destinationsСatalog = getDestinationsСatalog();

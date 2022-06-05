@@ -8,8 +8,8 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 const NEW_EVENT = {
   basePrice: 0,
-  dateFrom: null,
-  dateTo: null,
+  dateFrom: 'null',
+  dateTo: 'null',
   destination: {
     description: '',
     name: '',
@@ -17,7 +17,7 @@ const NEW_EVENT = {
   },
   isFavorite: false,
   offers: [],
-  type: ''
+  type: 'Taxi'
 };
 
 const createDestinationsListTemplate = (destinations) => (
@@ -134,7 +134,7 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
   const offersTemplate = createOffersTemplate(availableOffers, offers);
   const destinationTemplate = createDestinationTemplate(destination);
   const destionationsListTemplate = createDestinationsListTemplate(destinationsСatalog);
-  const isSubmitDisabled = !basePrice || !dateFrom || !dateTo || !type || !destination.name;
+  const isSubmitDisabled = !basePrice || !dateFrom || !dateTo || !destination.name;
 
   return (
     `<li class="trip-events__item">
@@ -204,7 +204,13 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
             >
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit"  ${isSubmitDisabled ? 'disabled' : ''}>Save</button>
+          <button
+            class="event__save-btn  btn  btn--blue"
+            type="submit"
+            ${isSubmitDisabled ? 'disabled' : ''}
+          >
+          Save
+          </button>
           <button class="event__reset-btn" type="reset">Delete</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
@@ -225,7 +231,7 @@ export default class EventEditView extends AbstractStatefulView {
   #dateFromPicker = null;
   #dateToPicker = null;
 
-  constructor(event = NEW_EVENT, destinationsCatalog, offersCatalog) {
+  constructor(destinationsCatalog, offersCatalog, event = NEW_EVENT) {
     super();
     this._state = EventEditView.parseEventToState(event);
     this.#destinationsCatalog = destinationsCatalog;
@@ -264,6 +270,7 @@ export default class EventEditView extends AbstractStatefulView {
     this.#setDateToPicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setEditClickHandler(this._callback.editClick);
+    this.setDeleteClickHandler(this._callback.deleteClick);
   };
 
   setFormSubmitHandler = (callback) => {
@@ -275,6 +282,17 @@ export default class EventEditView extends AbstractStatefulView {
     evt.preventDefault();
     this._callback.formSubmit(EventEditView.parseStateToEvent(this._state));
   };
+
+  setDeleteClickHandler = (callback) => {
+    this._callback.deleteClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteClick(EventEditView.parseStateToEvent(this._state));
+  };
+
 
   setEditClickHandler = (callback) => {
     this._callback.editClick = callback;
@@ -309,9 +327,7 @@ export default class EventEditView extends AbstractStatefulView {
   };
 
   #dueDateFromChangeHandler = ([userDate]) => {
-    this.updateElement({
-      dateFrom: userDate,
-    });
+    this.updateElement({ dateFrom: userDate });
   };
 
   #dueDateToChangeHandler = ([userDate]) => {
