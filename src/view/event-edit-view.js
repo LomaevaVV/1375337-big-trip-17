@@ -8,8 +8,8 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 const NEW_EVENT = {
   basePrice: 0,
-  dateFrom: 'null',
-  dateTo: 'null',
+  dateFrom: Date.now(),
+  dateTo: Date.now(),
   destination: {
     description: '',
     name: '',
@@ -269,7 +269,7 @@ export default class EventEditView extends AbstractStatefulView {
     this.#setDateFromPicker();
     this.#setDateToPicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
-    this.setEditClickHandler(this._callback.editClick);
+    this.setRollupButtonClickHandler(this._callback.editClick);
     this.setDeleteClickHandler(this._callback.deleteClick);
   };
 
@@ -294,7 +294,7 @@ export default class EventEditView extends AbstractStatefulView {
   };
 
 
-  setEditClickHandler = (callback) => {
+  setRollupButtonClickHandler = (callback) => {
     this._callback.editClick = callback;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   };
@@ -352,13 +352,12 @@ export default class EventEditView extends AbstractStatefulView {
     evt.preventDefault();
 
     const offerIdNumber = Number(evt.target.value);
-    let newSelectedOffers;
+    const newSelectedOffers = this._state.offers;
 
-    if (!this._state.offers.includes(offerIdNumber)) {
-      this._state.offers.push(offerIdNumber);
-      newSelectedOffers = this._state.offers;
+    if (newSelectedOffers.includes(offerIdNumber)) {
+      newSelectedOffers.push(offerIdNumber);
     } else {
-      newSelectedOffers = this._state.offers.filter((offerId) => offerId !== offerIdNumber);
+      newSelectedOffers.filter((offerId) => offerId !== offerIdNumber);
     }
 
     this.updateElement({
@@ -402,7 +401,7 @@ export default class EventEditView extends AbstractStatefulView {
     this.element.querySelector('.event__input--price')
       .addEventListener('change', this.#priceChangeHandler);
 
-    if (getOffersByType(this.#offersCatalog ,this._state.type)) {
+    if (getOffersByType(this.#offersCatalog, this._state.type)) {
       this.element.querySelector('.event__available-offers')
         .addEventListener('change', this.#offersChangeHandler);
     }

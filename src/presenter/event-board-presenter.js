@@ -3,6 +3,7 @@ import {render, RenderPosition, remove} from '../framework/render.js';
 import EventsListView from '../view/events-list-view.js';
 import SortView from '../view/sort-view.js';
 import NoEventsView from '../view/no-event-view.js';
+import NewEventButtonView from '../view/new-event-button-view.js';
 
 import EventPresenter from './event-presenter.js';
 import EventNewPresenter from './event-new-presenter.js';
@@ -13,6 +14,7 @@ import {filter} from '../utils/filter.js';
 
 export default class BoardPresenter {
   #boardContainer = null;
+  #tripContainer = null;
   #eventsModel = null;
   #filterModel = null;
   #destinationsCatalog = null;
@@ -20,6 +22,7 @@ export default class BoardPresenter {
   #currentSortType = SORT_TYPES.DAY;
   #filterType = FILTER_TYPES.EVERYTHING;
 
+  #newEventButtonComponent = new NewEventButtonView();
   #eventsListComponent = new EventsListView();
   #noEventsComponent = null;
   #sortComponent = null;
@@ -27,7 +30,8 @@ export default class BoardPresenter {
 
   #eventPresenter = new Map();
 
-  constructor(boardContainer, eventsModel, destinationsCatalog, offersCatalog, filterModel) {
+  constructor(tripContainer, boardContainer, eventsModel, destinationsCatalog, offersCatalog, filterModel) {
+    this.#tripContainer = tripContainer;
     this.#eventsModel = eventsModel;
     this.#boardContainer = boardContainer;
     this.#destinationsCatalog = destinationsCatalog;
@@ -58,11 +62,24 @@ export default class BoardPresenter {
   }
 
   init = () => {
+    render(this.#newEventButtonComponent, this.#tripContainer);
+    this.#newEventButtonComponent.setClickHandler(this.#handleNewEventButtonClick);
     this.#renderEventBoard();
   };
 
-  createEvent = () => {
-    this.#eventNewPresenter.init();
+  #createEvent = (callback) => {
+    this.#currentSortType = SORT_TYPES.DAY;
+    this.#filterModel.setFilter(UPDATE_TYPE.MAJOR, FILTER_TYPES.EVERYTHING);
+    this.#eventNewPresenter.init(callback);
+  };
+
+  #handleNewEventFormClose = () => {
+    this.#newEventButtonComponent.element.disabled = false;
+  };
+
+  #handleNewEventButtonClick = () => {
+    this.#createEvent(this.#handleNewEventFormClose);
+    this.#newEventButtonComponent.element.disabled = true;
   };
 
   #handleModeChange = () => {
@@ -89,10 +106,8 @@ export default class BoardPresenter {
   };
 
   #handleModelEvent = (updateType, data) => {
+    const resetSortType = data ? !data.id : false; //сбрасываем сортировку при смене фильтра
     // В зависимости от типа изменений решаем, что делать:
-    // - обновить часть списка (например, когда поменялось описание)
-    // - обновить список (например, когда задача ушла в архив)
-    // - обновить всю доску (например, при переключении фильтра)
     switch (updateType) {
       case UPDATE_TYPE.PATCH:
         // - обновить часть списка (например, когда поменялось описание)
@@ -105,7 +120,7 @@ export default class BoardPresenter {
         break;
       case UPDATE_TYPE.MAJOR:
         // - обновить всю доску (например, при переключении фильтра)
-        this.#clearEventBoard();
+        this.#clearEventBoard(resetSortType);
         this.#renderEventBoard();
         break;
     }
@@ -139,7 +154,7 @@ export default class BoardPresenter {
     this.#eventPresenter.set(event.id, eventPresenter);
   };
 
-  #clearEventBoard = () => {
+  #clearEventBoard = (resetSortType) => {
     this.#eventNewPresenter.destroy();
     this.#eventPresenter.forEach((presenter) => presenter.destroy());
     this.#eventPresenter.clear();
@@ -148,6 +163,10 @@ export default class BoardPresenter {
 
     if (this.#noEventsComponent) {
       remove(this.#noEventsComponent);
+    }
+
+    if (resetSortType) {
+      this.#currentSortType = SORT_TYPES.DAY;
     }
   };
 

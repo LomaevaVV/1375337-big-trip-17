@@ -44,17 +44,17 @@ export default class EventPresenter {
     this.#eventComponent.setFavoriteClickHandler(() => {
       this.#changeData(
         USER_ACTION.UPDATE_EVENT,
-        UPDATE_TYPE.MINOR,
+        UPDATE_TYPE.PATCH,
         {...this.#event, isFavorite: !this.#event.isFavorite},
       );
     });
 
     this.#eventComponent.setEditClickHandler(() => {
       this.#replaceEventToForm();
-      this.#eventEditComponent.reset(this.#event);
     });
 
-    this.#eventEditComponent.setEditClickHandler(() => {
+    this.#eventEditComponent.setRollupButtonClickHandler(() => {
+      this.#eventEditComponent.reset(this.#event);
       this.#replaceFormToEvent();
     });
 
@@ -96,6 +96,7 @@ export default class EventPresenter {
     document.addEventListener('keydown',  this.#onEventEditKeydown);
     this.#changeMode();
     this.#mode = Mode.EDITING;
+    window.console.log(this.#eventComponent);
   };
 
   #replaceFormToEvent = () => {

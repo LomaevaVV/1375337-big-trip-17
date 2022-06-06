@@ -18,7 +18,9 @@ export default class EventNewPresenter {
     this.#offersCatalog = offersCatalog;
   }
 
-  init = () => {
+  init = (callback) => {
+    this.#destroyCallback = callback;
+
     if (this.#eventEditComponent !== null) {
       return;
     }
@@ -26,6 +28,7 @@ export default class EventNewPresenter {
     this.#eventEditComponent = new EventEditView(this.#destinationsCatalog, this.#offersCatalog);
     this.#eventEditComponent.setFormSubmitHandler(this.#handleFormSubmit);
     this.#eventEditComponent.setDeleteClickHandler(this.#handleDeleteClick);
+    this.#eventEditComponent.setRollupButtonClickHandler(this.#handleDeleteClick);
 
     render(this.#eventEditComponent, this.#EventListContainer, RenderPosition.AFTERBEGIN);
 
