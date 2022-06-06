@@ -352,12 +352,12 @@ export default class EventEditView extends AbstractStatefulView {
     evt.preventDefault();
 
     const offerIdNumber = Number(evt.target.value);
-    const newSelectedOffers = this._state.offers;
+    let newSelectedOffers = [...this._state.offers];
 
-    if (newSelectedOffers.includes(offerIdNumber)) {
+    if (!newSelectedOffers.includes(offerIdNumber)) {
       newSelectedOffers.push(offerIdNumber);
     } else {
-      newSelectedOffers.filter((offerId) => offerId !== offerIdNumber);
+      newSelectedOffers = this._state.offers.filter((offerId) => offerId !== offerIdNumber);
     }
 
     this.updateElement({

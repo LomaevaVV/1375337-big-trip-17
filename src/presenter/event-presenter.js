@@ -96,7 +96,6 @@ export default class EventPresenter {
     document.addEventListener('keydown',  this.#onEventEditKeydown);
     this.#changeMode();
     this.#mode = Mode.EDITING;
-    window.console.log(this.#eventComponent);
   };
 
   #replaceFormToEvent = () => {
