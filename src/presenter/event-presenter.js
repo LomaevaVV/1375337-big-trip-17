@@ -115,7 +115,7 @@ export default class EventPresenter {
   #handleFormSubmit = (updatedEvent) => {
     // Проверяем, поменялись ли в задаче данные, которые попадают под фильтрацию,
     // а значит требуют перерисовки списка - если таких нет, это PATCH-обновление
-    const isMajorUpdate = this.#event.destination.name !== updatedEvent.destination.name || this.#event.basePrice !== updatedEvent.basePrice;
+    const isMajorUpdate = this.#event.destination.name !== updatedEvent.destination.name || this.#event.basePrice !== updatedEvent.basePrice || this.#event.dateTo !== updatedEvent.dateTo || this.#event.dateFrom !== updatedEvent.dateFrom || this.#event.type !== updatedEvent.type ;
 
     this.#changeData(
       USER_ACTION.UPDATE_EVENT,

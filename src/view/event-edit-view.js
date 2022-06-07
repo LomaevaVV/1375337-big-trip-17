@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import {humanizeEventDate} from '../utils/event.js';
+import {humanizeEventDate, calculateDateDif} from '../utils/event.js';
 import {POINT_TYPES} from '../constants.js';
 import {getOffersByType} from '../utils/offers.js';
 import flatpickr from 'flatpickr';
@@ -17,7 +17,7 @@ const NEW_EVENT = {
   },
   isFavorite: false,
   offers: [],
-  type: 'Taxi'
+  type: 'Sightseeing'
 };
 
 const createDestinationsListTemplate = (destinations) => (
@@ -98,7 +98,7 @@ const createPicturesTemplate = (pictures) => (
 );
 
 const createDestinationTemplate = (destination) => {
-  if (!destination) {
+  if (!destination || !destination.name) {
     return  '';
   }
 
@@ -134,7 +134,7 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
   const offersTemplate = createOffersTemplate(availableOffers, offers);
   const destinationTemplate = createDestinationTemplate(destination);
   const destionationsListTemplate = createDestinationsListTemplate(destinationsСatalog);
-  const isSubmitDisabled = !basePrice || !dateFrom || !dateTo || !destination.name;
+  const isSubmitDisabled = basePrice <= 0 || !destination.name || calculateDateDif(dateFrom, dateTo) === 0;
 
   return (
     `<li class="trip-events__item">

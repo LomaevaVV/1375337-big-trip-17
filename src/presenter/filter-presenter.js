@@ -14,9 +14,6 @@ export default class FilterPresenter {
     this.#filterContainer = filterContainer;
     this.#filterModel = filterModel;
     this.#eventsModel = eventsModel;
-
-    this.#eventsModel.addObserver(this.#handleModelEvent);
-    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get filters() {
@@ -57,15 +54,11 @@ export default class FilterPresenter {
     remove(prevFilterComponent);
   };
 
-  #handleModelEvent = () => {
-    this.init();
-  };
-
   #handleFilterTypeChange = (filterType) => {
     if (this.#filterModel.filter === filterType) {
       return;
     }
 
-    this.#filterModel.setFilter(UPDATE_TYPE.MAJOR, filterType);
+    this.#filterModel.setFilter(UPDATE_TYPE.MINOR, filterType);
   };
 }

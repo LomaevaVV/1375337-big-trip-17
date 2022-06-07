@@ -36,7 +36,7 @@ export default class EventNewPresenter {
   };
 
   destroy = () => {
-    if (this.#eventEditComponent === null) {
+    if (!this.#eventEditComponent) {
       return;
     }
 

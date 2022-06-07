@@ -12,7 +12,7 @@ export default class EventsModel extends Observable{
     const updatedEventIndex = this.#events.findIndex((event) => event.id === updatedEvent.id);
 
     if (updatedEventIndex === -1) {
-      throw new Error('Can\'t update unexisting event');
+      throw new Error(`Can't update unexisting event, updatedEvent: ${updatedEvent}`);
     }
 
     this.#events = [
@@ -34,16 +34,7 @@ export default class EventsModel extends Observable{
   };
 
   deleteEvent = (updateType, eventToDelete) => {
-    const eventToDeleteIndex = this.#events.findIndex((event) => event.id === eventToDelete.id);
-
-    if (eventToDeleteIndex === -1) {
-      throw new Error('Can\'t delete unexisting event');
-    }
-
-    this.#events = [
-      ...this.#events.slice(0, eventToDeleteIndex),
-      ...this.#events.slice(eventToDeleteIndex + 1),
-    ];
+    this.#events = this.#events.filter((event) => event.id !== eventToDelete.id);
 
     this._notify(updateType);
   };

@@ -4,12 +4,14 @@ import TripInfoView from '../view/trip-info-view.js';
 export default class TripInfoPresenter {
   #tripInfoContainer = null;
   #eventsModel = null;
+  #offersModel = null;
   #tripInfoComponent = null;
   #prevTripInfoComponent = null;
 
-  constructor(tripInfoContainer, eventsModel) {
+  constructor(tripInfoContainer, eventsModel, offersModel) {
     this.#tripInfoContainer = tripInfoContainer;
     this.#eventsModel = eventsModel;
+    this.#offersModel = offersModel;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
   }
@@ -17,7 +19,7 @@ export default class TripInfoPresenter {
   init = () => {
     this.#prevTripInfoComponent = this.#tripInfoComponent;
 
-    this.#tripInfoComponent = new TripInfoView(this.#eventsModel.events);
+    this.#tripInfoComponent = new TripInfoView(this.#eventsModel.events, this.#offersModel);
 
     if (this.#prevTripInfoComponent === null) {
       render(this.#tripInfoComponent, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);

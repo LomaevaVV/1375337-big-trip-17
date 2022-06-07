@@ -7,6 +7,7 @@ import NewEventButtonView from '../view/new-event-button-view.js';
 
 import EventPresenter from './event-presenter.js';
 import EventNewPresenter from './event-new-presenter.js';
+import TripInfoPresenter from './trip-info-presenter.js';
 
 import {USER_ACTION, UPDATE_TYPE, FILTER_TYPES, SORT_TYPES} from '../constants.js';
 import {getSortedEvents, getSortedEventsbyDate} from '../utils/sort.js';
@@ -17,8 +18,8 @@ export default class BoardPresenter {
   #tripContainer = null;
   #eventsModel = null;
   #filterModel = null;
-  #destinationsCatalog = null;
-  #offersCatalog = null;
+  #destinationsModel = null;
+  #offersModel = null;
   #currentSortType = SORT_TYPES.DAY;
   #filterType = FILTER_TYPES.EVERYTHING;
 
@@ -27,18 +28,20 @@ export default class BoardPresenter {
   #noEventsComponent = null;
   #sortComponent = null;
   #eventNewPresenter = null;
+  #tripInfoPresenter = null;
 
   #eventPresenter = new Map();
 
-  constructor(tripContainer, boardContainer, eventsModel, destinationsCatalog, offersCatalog, filterModel) {
+  constructor(tripContainer, boardContainer, eventsModel, destinationsModel, offersModel, filterModel) {
     this.#tripContainer = tripContainer;
     this.#eventsModel = eventsModel;
     this.#boardContainer = boardContainer;
-    this.#destinationsCatalog = destinationsCatalog;
-    this.#offersCatalog = offersCatalog;
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#filterModel = filterModel;
 
-    this.#eventNewPresenter = new EventNewPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.#destinationsCatalog, this.#offersCatalog);
+    this.#eventNewPresenter = new EventNewPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.destinationsCatalog, this.offersCatalog);
+    this.#tripInfoPresenter = new TripInfoPresenter(this.#tripContainer, this.#eventsModel, this.offersCatalog);
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -59,6 +62,16 @@ export default class BoardPresenter {
     }
 
     return filteredEvents;
+  }
+
+  get offersCatalog() {
+    const offersCatalog = this.#offersModel.offers;
+    return offersCatalog;
+  }
+
+  get destinationsCatalog() {
+    const destinationsCatalog = this.#destinationsModel.destinations;
+    return destinationsCatalog;
   }
 
   init = () => {
@@ -88,10 +101,6 @@ export default class BoardPresenter {
   };
 
   #handleViewAction = (actionType, updateType, updatedEvent) => {
-    // Здесь будем вызывать обновление модели.
-    // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
-    // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
-    // update - обновленные данные
     switch (actionType) {
       case USER_ACTION.UPDATE_EVENT:
         this.#eventsModel.updateEvent(updateType, updatedEvent);
@@ -110,17 +119,17 @@ export default class BoardPresenter {
     // В зависимости от типа изменений решаем, что делать:
     switch (updateType) {
       case UPDATE_TYPE.PATCH:
-        // - обновить часть списка (например, когда поменялось описание)
+        // - обновить только точку маршрута
         this.#eventPresenter.get(data.id).init(data);
         break;
       case UPDATE_TYPE.MINOR:
-        // - обновить список (например, когда задача ушла в архив)
-        this.#clearEventBoard();
-        this.#renderEventBoard();
+        // - обновить только список ивентов со сбросом сортировки при переключении фильтра
+        this.#clearEventsList(resetSortType);
+        this.#renderEventsList();
         break;
       case UPDATE_TYPE.MAJOR:
-        // - обновить всю доску (например, при переключении фильтра)
-        this.#clearEventBoard(resetSortType);
+        // - обновить всю доску при изменении названий точек, типа, цены или дат. так как влияют на сортировку и трип-инфо
+        this.#clearEventBoard();
         this.#renderEventBoard();
         break;
     }
@@ -148,14 +157,18 @@ export default class BoardPresenter {
     render(this.#noEventsComponent, this.#boardContainer);
   };
 
+  #renderTripInfo = () => {
+    this.#tripInfoPresenter.init();
+  };
+
   #renderEvent = (event)  => {
-    const eventPresenter = new EventPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.#handleModeChange, this.#destinationsCatalog, this.#offersCatalog);
+    const eventPresenter = new EventPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.#handleModeChange, this.destinationsCatalog, this.offersCatalog);
+
     eventPresenter.init(event);
     this.#eventPresenter.set(event.id, eventPresenter);
   };
 
-  #clearEventBoard = (resetSortType) => {
-    this.#eventNewPresenter.destroy();
+  #clearEventsList = (resetSortType) => {
     this.#eventPresenter.forEach((presenter) => presenter.destroy());
     this.#eventPresenter.clear();
 
@@ -170,7 +183,12 @@ export default class BoardPresenter {
     }
   };
 
-  #renderEventBoard = () => {
+  #clearEventBoard = () => {
+    this.#eventNewPresenter.destroy();
+    this.#clearEventsList();
+  };
+
+  #renderEventsList = () => {
     if (this.events.length === 0) {
       this.#renderNoEvents();
     } else {
@@ -178,5 +196,10 @@ export default class BoardPresenter {
       render(this.#eventsListComponent, this.#boardContainer);
       this.events.forEach(this.#renderEvent);
     }
+  };
+
+  #renderEventBoard = () => {
+    this.#renderTripInfo();
+    this.#renderEventsList();
   };
 }

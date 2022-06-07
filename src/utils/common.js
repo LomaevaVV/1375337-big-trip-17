@@ -1,12 +1,12 @@
 export const isEscEvent = (evt) => evt.key === 'Esc' || evt.key === 'Escape';
 
 export const getRandomNumber = (min, max) => {
-  if (min < max && min >= 0) {
+  if (min <= max && min >= 0) {
     const randomNumber = Math.random() * ((max + 1) - min) + min;
 
     return Math.floor(randomNumber);
   }
-  throw new Error('Диапазон задан неверно: минимальное значение диапазона должно быть меньше максимального. Граничные значения диапазона не могут быть меньше 0.');
+  throw new Error('Диапазон задан неверно: Граничные значения диапазона не могут быть меньше 0.');
 };
 
 export const getRandomArrayElement = (elements) => elements[getRandomNumber(0, elements.length - 1)];
