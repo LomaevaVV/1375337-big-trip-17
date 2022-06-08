@@ -47,13 +47,13 @@ export default class TripInfoView extends AbstractView {
 
   #getTripDestinations = () => {
     const startDestinationName =  this.#sortedEvents[0].destination.name;
-    const endDestinationName = this.#sortedEvents.length >= 2 ? this.#sortedEvents.at(-1).destination.name : '';
+    const endDestinationName = this.#sortedEvents.at(-1).destination.name;
 
     if (this.#sortedEvents.length > 3) {
-      return `${startDestinationName} — ... &nbsp— ${endDestinationName}`;
+      return `${startDestinationName} &mdash; ... &nbsp &mdash; ${endDestinationName}`;
     }
     if (this.#sortedEvents.length === 3 || this.#sortedEvents.length === 2) {
-      return this.#sortedEvents.map(({ destination }) => `${destination.name}`).join(' — ');
+      return this.#sortedEvents.map(({ destination }) => `${destination.name}`).join(' &mdash; ');
     }
     return `${startDestinationName}`;
   };
