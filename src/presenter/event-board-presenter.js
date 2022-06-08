@@ -157,10 +157,7 @@ export default class BoardPresenter {
     render(this.#noEventsComponent, this.#boardContainer);
   };
 
-  #renderTripInfo = () => {
-    this.#tripInfoPresenter.init();
-  };
-
+  #renderTripInfo = () => this.events.length !== 0 ? this.#tripInfoPresenter.init() : null ;
   #renderEvent = (event)  => {
     const eventPresenter = new EventPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.#handleModeChange, this.destinationsCatalog, this.offersCatalog);
 

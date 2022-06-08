@@ -21,7 +21,7 @@ export default class TripInfoPresenter {
 
     this.#tripInfoComponent = new TripInfoView(this.#eventsModel.events, this.#offersModel);
 
-    if (this.#prevTripInfoComponent === null) {
+    if (this.#prevTripInfoComponent === null && this.#eventsModel.events !== 0) {
       render(this.#tripInfoComponent, this.#tripInfoContainer, RenderPosition.AFTERBEGIN);
       return;
     }

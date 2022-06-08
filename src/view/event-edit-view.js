@@ -3,13 +3,14 @@ import {humanizeEventDate, calculateDateDif} from '../utils/event.js';
 import {POINT_TYPES} from '../constants.js';
 import {getOffersByType} from '../utils/offers.js';
 import flatpickr from 'flatpickr';
+import dayjs from 'dayjs';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
 const NEW_EVENT = {
   basePrice: 0,
-  dateFrom: Date.now(),
-  dateTo: Date.now(),
+  dateFrom: `${humanizeEventDate(dayjs(),'YYYY-MM-DD[T]HH:mm:ss[.375Z]')}`,
+  dateTo: `${humanizeEventDate(dayjs().add(1, 'h'),'YYYY-MM-DD[T]HH:mm:ss[.375Z]')}`,
   destination: {
     description: '',
     name: '',
@@ -198,8 +199,10 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
             <input
               class="event__input  event__input--price"
               id="event-price-${id}"
-              type="text"
+              type="number"
               name="event-price"
+              min="0"
+              step="1"
               value="${basePrice}"
             >
           </div>
