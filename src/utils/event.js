@@ -26,9 +26,13 @@ export const calculateDateDif = (dateFrom, dateTo) => {
     dateDif = `${days + DATE_WORD.days} ${hours + DATE_WORD.hours} ${minutes + DATE_WORD.minutes}`;
   }
 
+  if (minutes <= 0 && hours <= 0 && days <= 0) {
+    return 0;
+  }
+
   return dateDif;
 };
 
-export const isEventInFuture = (eventDate) => dayjs().isBefore(eventDate, 'D');
+export const isEventInFuture = (eventDate) => !dayjs().isAfter(eventDate, 'D');
 
-export const isEventInPast = (eventDate) => dayjs().isAfter(eventDate, 'D');
+export const isEventInPast = (eventDate) => !dayjs().isBefore(eventDate, 'D');

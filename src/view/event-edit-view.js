@@ -1,15 +1,16 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import {humanizeEventDate} from '../utils/event.js';
+import {humanizeEventDate, calculateDateDif} from '../utils/event.js';
 import {POINT_TYPES} from '../constants.js';
 import {getOffersByType} from '../utils/offers.js';
 import flatpickr from 'flatpickr';
+import dayjs from 'dayjs';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
 const NEW_EVENT = {
   basePrice: 0,
-  dateFrom: null,
-  dateTo: null,
+  dateFrom: `${humanizeEventDate(dayjs(),'YYYY-MM-DD[T]HH:mm:ss[.375Z]')}`,
+  dateTo: `${humanizeEventDate(dayjs().add(1, 'h'),'YYYY-MM-DD[T]HH:mm:ss[.375Z]')}`,
   destination: {
     description: '',
     name: '',
@@ -17,7 +18,7 @@ const NEW_EVENT = {
   },
   isFavorite: false,
   offers: [],
-  type: ''
+  type: 'Sightseeing'
 };
 
 const createDestinationsListTemplate = (destinations) => (
@@ -98,7 +99,7 @@ const createPicturesTemplate = (pictures) => (
 );
 
 const createDestinationTemplate = (destination) => {
-  if (!destination) {
+  if (!destination || !destination.name) {
     return  '';
   }
 
@@ -134,7 +135,7 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
   const offersTemplate = createOffersTemplate(availableOffers, offers);
   const destinationTemplate = createDestinationTemplate(destination);
   const destionationsListTemplate = createDestinationsListTemplate(destinationsСatalog);
-  const isSubmitDisabled = !basePrice || !dateFrom || !dateTo || !type || !destination.name;
+  const isSubmitDisabled = basePrice <= 0 || !destination.name || calculateDateDif(dateFrom, dateTo) === 0;
 
   return (
     `<li class="trip-events__item">
@@ -198,13 +199,21 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
             <input
               class="event__input  event__input--price"
               id="event-price-${id}"
-              type="text"
+              type="number"
               name="event-price"
+              min="0"
+              step="1"
               value="${basePrice}"
             >
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit"  ${isSubmitDisabled ? 'disabled' : ''}>Save</button>
+          <button
+            class="event__save-btn  btn  btn--blue"
+            type="submit"
+            ${isSubmitDisabled ? 'disabled' : ''}
+          >
+          Save
+          </button>
           <button class="event__reset-btn" type="reset">Delete</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
@@ -225,7 +234,7 @@ export default class EventEditView extends AbstractStatefulView {
   #dateFromPicker = null;
   #dateToPicker = null;
 
-  constructor(event = NEW_EVENT, destinationsCatalog, offersCatalog) {
+  constructor(destinationsCatalog, offersCatalog, event = NEW_EVENT) {
     super();
     this._state = EventEditView.parseEventToState(event);
     this.#destinationsCatalog = destinationsCatalog;
@@ -263,7 +272,8 @@ export default class EventEditView extends AbstractStatefulView {
     this.#setDateFromPicker();
     this.#setDateToPicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
-    this.setEditClickHandler(this._callback.editClick);
+    this.setRollupButtonClickHandler(this._callback.editClick);
+    this.setDeleteClickHandler(this._callback.deleteClick);
   };
 
   setFormSubmitHandler = (callback) => {
@@ -276,7 +286,18 @@ export default class EventEditView extends AbstractStatefulView {
     this._callback.formSubmit(EventEditView.parseStateToEvent(this._state));
   };
 
-  setEditClickHandler = (callback) => {
+  setDeleteClickHandler = (callback) => {
+    this._callback.deleteClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.deleteClick(EventEditView.parseStateToEvent(this._state));
+  };
+
+
+  setRollupButtonClickHandler = (callback) => {
     this._callback.editClick = callback;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   };
@@ -309,9 +330,7 @@ export default class EventEditView extends AbstractStatefulView {
   };
 
   #dueDateFromChangeHandler = ([userDate]) => {
-    this.updateElement({
-      dateFrom: userDate,
-    });
+    this.updateElement({ dateFrom: userDate });
   };
 
   #dueDateToChangeHandler = ([userDate]) => {
@@ -336,11 +355,10 @@ export default class EventEditView extends AbstractStatefulView {
     evt.preventDefault();
 
     const offerIdNumber = Number(evt.target.value);
-    let newSelectedOffers;
+    let newSelectedOffers = [...this._state.offers];
 
-    if (!this._state.offers.includes(offerIdNumber)) {
-      this._state.offers.push(offerIdNumber);
-      newSelectedOffers = this._state.offers;
+    if (!newSelectedOffers.includes(offerIdNumber)) {
+      newSelectedOffers.push(offerIdNumber);
     } else {
       newSelectedOffers = this._state.offers.filter((offerId) => offerId !== offerIdNumber);
     }
@@ -386,7 +404,7 @@ export default class EventEditView extends AbstractStatefulView {
     this.element.querySelector('.event__input--price')
       .addEventListener('change', this.#priceChangeHandler);
 
-    if (getOffersByType(this.#offersCatalog ,this._state.type)) {
+    if (getOffersByType(this.#offersCatalog, this._state.type)) {
       this.element.querySelector('.event__available-offers')
         .addEventListener('change', this.#offersChangeHandler);
     }

@@ -1,41 +1,60 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {getSortedEventsbyDate} from '../utils/sort.js';
 import {humanizeEventDate} from '../utils/event.js';
+import {getOferrsCost} from '../utils/offers.js';
 
-const createTripInfoTemplate = (events) => {
-  const sortedEvents = getSortedEventsbyDate(events);
-  const startDate = sortedEvents[0].dateFrom;
-  const endDate = sortedEvents[sortedEvents.length - 1].dateTo;
-  let tripCost = 0;
-
-  for (let i = 0; i < events.length; i++) {
-    tripCost += events[i].basePrice;
-  }
+const createTripInfoTemplate = (sortedEvents, tripCost, tripDestinations) => {
+  const startEventDate = humanizeEventDate(sortedEvents[0].dateFrom,'MMM DD');
+  const endEventDate = humanizeEventDate(sortedEvents.at(-1).dateTo,'MMM DD');
 
   return (
     `<section class="trip-main__trip-info  trip-info">
-      <div class="trip-info__main">
-        <h1 class="trip-info__title">Amsterdam &mdash; Chamonix &mdash; Geneva</h1>
+        <div class="trip-info__main">
+          <h1 class="trip-info__title">${tripDestinations}</h1>
 
-        <p class="trip-info__dates">${humanizeEventDate(startDate,'MMM DD')}&nbsp;&mdash;&nbsp;${humanizeEventDate(endDate,'MMM DD')}</p>
-      </div>
+          <p class="trip-info__dates">${startEventDate}&nbsp;&mdash;&nbsp;${endEventDate}</p>
+        </div>
 
-      <p class="trip-info__cost">
-        Total: &euro;&nbsp;<span class="trip-info__cost-value">${tripCost}</span>
-      </p>
-    </section>`
+        <p class="trip-info__cost">
+          Total: &euro;&nbsp;<span class="trip-info__cost-value">${tripCost}</span>
+        </p>
+      </section>`
   );
 };
 
 export default class TripInfoView extends AbstractView {
-  #events = null;
+  #sortedEvents = null;
+  #offersCatalog = null;
 
-  constructor(events) {
+  constructor(events, offersCatalog) {
     super();
-    this.#events = events;
+    this.#sortedEvents = getSortedEventsbyDate(events);
+    this.#offersCatalog = offersCatalog;
   }
 
   get template() {
-    return createTripInfoTemplate(this.#events);
+    return createTripInfoTemplate(this.#sortedEvents, this.#getTripCost(), this.#getTripDestinations());
   }
+
+  #getTripCost = () => this.#sortedEvents.reduce(
+    (acc, { offers, type, basePrice }) => {
+      const offersCost = getOferrsCost(this.#offersCatalog, offers, type);
+      acc += offersCost + basePrice;
+      return acc;
+    },
+    0);
+
+
+  #getTripDestinations = () => {
+    const startDestinationName =  this.#sortedEvents[0].destination.name;
+    const endDestinationName = this.#sortedEvents.at(-1).destination.name;
+
+    if (this.#sortedEvents.length > 3) {
+      return `${startDestinationName} &mdash; ... &nbsp &mdash; ${endDestinationName}`;
+    }
+    if (this.#sortedEvents.length === 3 || this.#sortedEvents.length === 2) {
+      return this.#sortedEvents.map(({ destination }) => `${destination.name}`).join(' &mdash; ');
+    }
+    return `${startDestinationName}`;
+  };
 }

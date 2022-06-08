@@ -3,7 +3,7 @@ import {getRandomNumber} from '../utils/common.js';
 const OFFER_PRICE_MIN = 10;
 const OFFER_PRICE_MAX = 200;
 
-export const offersСatalog = [
+export const getOffersCatalog = () => [
   {
     type: 'Flight',
     offers: [
@@ -109,3 +109,4 @@ export const offersСatalog = [
   }
 ];
 
+export const offersСatalog = getOffersCatalog();
