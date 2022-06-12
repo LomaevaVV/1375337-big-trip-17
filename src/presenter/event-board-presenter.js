@@ -4,10 +4,12 @@ import EventsListView from '../view/events-list-view.js';
 import SortView from '../view/sort-view.js';
 import NoEventsView from '../view/no-event-view.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
+import LoadingView from '../view/loading-view.js';
 
 import EventPresenter from './event-presenter.js';
 import EventNewPresenter from './event-new-presenter.js';
 import TripInfoPresenter from './trip-info-presenter.js';
+import FilterPresenter from './filter-presenter.js';
 
 import {USER_ACTION, UPDATE_TYPE, FILTER_TYPES, SORT_TYPES} from '../constants.js';
 import {getSortedEvents, getSortedEventsbyDate} from '../utils/sort.js';
@@ -27,21 +29,23 @@ export default class BoardPresenter {
   #eventsListComponent = new EventsListView();
   #noEventsComponent = null;
   #sortComponent = null;
+  #loadingComponent = new LoadingView();
   #eventNewPresenter = null;
   #tripInfoPresenter = null;
+  #filterPresenter = null;
+  #filterComponent =  null;
+  #isLoading = true;
 
   #eventPresenter = new Map();
 
-  constructor(tripContainer, boardContainer, eventsModel, destinationsModel, offersModel, filterModel) {
+  constructor(siteFilter, tripContainer, boardContainer, eventsModel, destinationsModel, offersModel, filterModel) {
     this.#tripContainer = tripContainer;
     this.#eventsModel = eventsModel;
     this.#boardContainer = boardContainer;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
     this.#filterModel = filterModel;
-
-    this.#eventNewPresenter = new EventNewPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.destinationsCatalog, this.offersCatalog);
-    this.#tripInfoPresenter = new TripInfoPresenter(this.#tripContainer, this.#eventsModel, this.offersCatalog);
+    this.#filterComponent = siteFilter;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -75,8 +79,13 @@ export default class BoardPresenter {
   }
 
   init = () => {
+    this.#eventNewPresenter = new EventNewPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.destinationsCatalog, this.offersCatalog);
+    this.#tripInfoPresenter = new TripInfoPresenter(this.#tripContainer, this.#eventsModel, this.offersCatalog);
+    this.#filterPresenter = new FilterPresenter(this.#filterComponent, this.#filterModel, this.#eventsModel);
+
     render(this.#newEventButtonComponent, this.#tripContainer);
     this.#newEventButtonComponent.setClickHandler(this.#handleNewEventButtonClick);
+
     this.#renderEventBoard();
   };
 
@@ -132,6 +141,12 @@ export default class BoardPresenter {
         this.#clearEventBoard();
         this.#renderEventBoard();
         break;
+      case UPDATE_TYPE.INIT:
+        this.#isLoading = false;
+        this.#clearEventBoard();
+        this.#filterPresenter.init();
+        this.#renderEventBoard();
+        break;
     }
   };
 
@@ -152,12 +167,17 @@ export default class BoardPresenter {
     render(this.#sortComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
   };
 
+  #renderLoading = () => {
+    render(this.#loadingComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
+  };
+
   #renderNoEvents = () => {
     this.#noEventsComponent = new NoEventsView(this.#filterType);
     render(this.#noEventsComponent, this.#boardContainer);
   };
 
   #renderTripInfo = () => this.events.length !== 0 ? this.#tripInfoPresenter.init() : null ;
+
   #renderEvent = (event)  => {
     const eventPresenter = new EventPresenter(this.#eventsListComponent.element, this.#handleViewAction, this.#handleModeChange, this.destinationsCatalog, this.offersCatalog);
 
@@ -170,6 +190,7 @@ export default class BoardPresenter {
     this.#eventPresenter.clear();
 
     remove(this.#sortComponent);
+    remove(this.#loadingComponent);
 
     if (this.#noEventsComponent) {
       remove(this.#noEventsComponent);
@@ -196,6 +217,11 @@ export default class BoardPresenter {
   };
 
   #renderEventBoard = () => {
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
     this.#renderTripInfo();
     this.#renderEventsList();
   };
