@@ -1,23 +1,34 @@
 import BoardPresenter from './presenter/event-board-presenter.js';
-import FilterPresenter from './presenter/filter-presenter.js';
+import EventsApiService from './api-service/events-api-service.js';
 
 import EventsModel from './model/events-model.js';
 import OffersModel from './model/offers-model.js';
 import FilterModel from './model/filter-model.js';
 import DestinationsModel from './model/destinations-model.js';
 
+const AUTHORIZATION = 'Basic 28d08vaL19Ya84t';
+const END_POINT = 'https://17.ecmascript.pages.academy/big-trip';
+
 const siteHeader = document.querySelector('.trip-main');
 const siteFilter = siteHeader.querySelector('.trip-controls__filters');
 const siteEvents = document.querySelector('.trip-events');
 
-const offersModel = new OffersModel();
-const destinationsModel = new DestinationsModel();
-const eventsModel = new EventsModel();
+const offersModel = new OffersModel(new EventsApiService(END_POINT, AUTHORIZATION));
+const destinationsModel = new DestinationsModel(new EventsApiService(END_POINT, AUTHORIZATION));
+const eventsModel = new EventsModel(new EventsApiService(END_POINT, AUTHORIZATION));
 const filterModel = new FilterModel();
-const boardPresenter = new BoardPresenter(siteHeader, siteEvents, eventsModel, destinationsModel, offersModel, filterModel);
-const filterPresenter = new FilterPresenter(siteFilter, filterModel, eventsModel);
+const boardPresenter = new BoardPresenter(siteFilter, siteHeader, siteEvents, eventsModel, destinationsModel, offersModel, filterModel);
 
-filterPresenter.init();
-boardPresenter.init();
 
+const loadDataFromServer = async () => {
+  await destinationsModel.init();
+  await offersModel.init();
+
+  eventsModel.init();
+};
+
+loadDataFromServer()
+  .finally(() => {
+    boardPresenter.init();
+  });
 

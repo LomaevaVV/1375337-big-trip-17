@@ -1,27 +1,48 @@
 import Observable from '../framework/observable.js';
-import {generateEvent} from '../mock/event.js';
-
+import {UPDATE_TYPE} from '../constants.js';
 export default class EventsModel extends Observable{
-  #events = Array.from({length: 20}, generateEvent);
+  #eventsApiService = null;
+  #events = [];
+
+  constructor(eventsApiService) {
+    super();
+    this.#eventsApiService = eventsApiService;
+  }
 
   get events () {
     return this.#events;
   }
 
-  updateEvent = (updateType, updatedEvent) => {
+  init = async () => {
+    try {
+      const events = await this.#eventsApiService.events;
+      this.#events = events.map(this.#adaptToClient);
+    } catch(err) {
+      this.#events = [];
+    }
+
+    this._notify(UPDATE_TYPE.INIT);
+  };
+
+  updateEvent = async (updateType, updatedEvent) => {
     const updatedEventIndex = this.#events.findIndex((event) => event.id === updatedEvent.id);
 
     if (updatedEventIndex === -1) {
       throw new Error(`Can't update unexisting event, updatedEvent: ${updatedEvent}`);
     }
 
-    this.#events = [
-      ...this.#events.slice(0, updatedEventIndex),
-      updatedEvent,
-      ...this.#events.slice(updatedEventIndex + 1),
-    ];
-
-    this._notify(updateType, updatedEvent);
+    try {
+      const response = await this.#eventsApiService.updateEvent(updatedEvent);
+      const updatedEventAdapt = this.#adaptToClient(response);
+      this.#events = [
+        ...this.#events.slice(0, updatedEventIndex),
+        updatedEventAdapt,
+        ...this.#events.slice(updatedEventIndex + 1),
+      ];
+      this._notify(updateType, updatedEventAdapt);
+    } catch(err) {
+      throw new Error(`Can't update event: ${err.message}. UpdatedEvent: ${updatedEvent}.`);
+    }
   };
 
   addEvent = (updateType, updatedEvent) => {
@@ -37,5 +58,21 @@ export default class EventsModel extends Observable{
     this.#events = this.#events.filter((event) => event.id !== eventToDelete.id);
 
     this._notify(updateType);
+  };
+
+  #adaptToClient = (event) => {
+    const adaptedEvent = {...event,
+      basePrice: event['base_price'],
+      dateFrom: event['date_from'] !== null ? new Date(event['date_from']) : event['date_from'],
+      dateTo: event['date_to'] !== null ? new Date(event['date_to']) : event['date_to'],
+      isFavorite: event['is_favorite']
+    };
+
+    delete adaptedEvent['base_price'];
+    delete adaptedEvent['date_from'];
+    delete adaptedEvent['date_to'];
+    delete adaptedEvent['is_favorite'];
+
+    return adaptedEvent;
   };
 }

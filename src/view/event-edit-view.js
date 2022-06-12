@@ -404,7 +404,7 @@ export default class EventEditView extends AbstractStatefulView {
     this.element.querySelector('.event__input--price')
       .addEventListener('change', this.#priceChangeHandler);
 
-    if (getOffersByType(this.#offersCatalog, this._state.type)) {
+    if (this.element.querySelector('.event__available-offers')) {
       this.element.querySelector('.event__available-offers')
         .addEventListener('change', this.#offersChangeHandler);
     }

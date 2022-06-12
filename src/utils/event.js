@@ -32,7 +32,3 @@ export const calculateDateDif = (dateFrom, dateTo) => {
 
   return dateDif;
 };
-
-export const isEventInFuture = (eventDate) => !dayjs().isAfter(eventDate, 'D');
-
-export const isEventInPast = (eventDate) => !dayjs().isBefore(eventDate, 'D');
