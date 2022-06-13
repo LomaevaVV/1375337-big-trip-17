@@ -13,17 +13,21 @@ const siteHeader = document.querySelector('.trip-main');
 const siteFilter = siteHeader.querySelector('.trip-controls__filters');
 const siteEvents = document.querySelector('.trip-events');
 
-const offersModel = new OffersModel(new EventsApiService(END_POINT, AUTHORIZATION));
-const destinationsModel = new DestinationsModel(new EventsApiService(END_POINT, AUTHORIZATION));
-const eventsModel = new EventsModel(new EventsApiService(END_POINT, AUTHORIZATION));
+const eventsApiService = new EventsApiService(END_POINT, AUTHORIZATION);
+const offersModel = new OffersModel(eventsApiService);
+const destinationsModel = new DestinationsModel(eventsApiService);
+const eventsModel = new EventsModel(eventsApiService);
 const filterModel = new FilterModel();
 const boardPresenter = new BoardPresenter(siteFilter, siteHeader, siteEvents, eventsModel, destinationsModel, offersModel, filterModel);
 
 
 const loadDataFromServer = async () => {
-  await destinationsModel.init();
-  await offersModel.init();
-
+  try {
+    await destinationsModel.init();
+    await offersModel.init();
+  } catch(err) {
+    eventsModel.init();
+  }
   eventsModel.init();
 };
 
