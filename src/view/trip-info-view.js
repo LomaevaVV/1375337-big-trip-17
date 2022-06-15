@@ -3,6 +3,8 @@ import {getSortedEventsbyDate} from '../utils/sort.js';
 import {humanizeEventDate} from '../utils/event.js';
 import {getOferrsCost} from '../utils/offers.js';
 
+const TRIP_INFO_MAX_LENGTH = 3;
+
 const createTripInfoTemplate = (sortedEvents, tripCost, tripDestinations) => {
   const startEventDate = humanizeEventDate(sortedEvents[0].dateFrom,'MMM DD');
   const endEventDate = humanizeEventDate(sortedEvents.at(-1).dateTo,'MMM DD');
@@ -49,12 +51,10 @@ export default class TripInfoView extends AbstractView {
     const startDestinationName =  this.#sortedEvents[0].destination.name;
     const endDestinationName = this.#sortedEvents.at(-1).destination.name;
 
-    if (this.#sortedEvents.length > 3) {
+    if (this.#sortedEvents.length > TRIP_INFO_MAX_LENGTH) {
       return `${startDestinationName} &mdash; ... &nbsp &mdash; ${endDestinationName}`;
     }
-    if (this.#sortedEvents.length === 3 || this.#sortedEvents.length === 2) {
-      return this.#sortedEvents.map(({ destination }) => `${destination.name}`).join(' &mdash; ');
-    }
-    return `${startDestinationName}`;
+
+    return this.#sortedEvents.map(({ destination }) => `${destination.name}`).join(' &mdash; ');
   };
 }
