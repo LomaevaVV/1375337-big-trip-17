@@ -69,6 +69,7 @@ export default class EventsModel extends Observable{
 
     try {
       await this.#eventsApiService.deleteEvent(eventToDelete);
+
       this.#events = this.#events.filter((event) => event.id !== eventToDelete.id);
       this._notify(updateType);
     } catch(err) {

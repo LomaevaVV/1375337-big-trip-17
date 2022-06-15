@@ -25,10 +25,9 @@ const loadDataFromServer = async () => {
   try {
     await destinationsModel.init();
     await offersModel.init();
-  } catch(err) {
+  } finally {
     eventsModel.init();
   }
-  eventsModel.init();
 };
 
 loadDataFromServer()

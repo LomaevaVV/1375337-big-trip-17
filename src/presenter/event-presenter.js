@@ -162,6 +162,5 @@ export default class EventPresenter {
       UPDATE_TYPE.MINOR,
       event,
     );
-    this.#replaceFormToEvent();
   };
 }

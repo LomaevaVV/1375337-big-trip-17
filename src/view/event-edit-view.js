@@ -140,7 +140,7 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
   const destinationTemplate = createDestinationTemplate(destination);
   const destionationsListTemplate = createDestinationsListTemplate(destinationsСatalog);
   const isSubmitDisabled = basePrice <= 0 || !destination.name || calculateDateDif(dateFrom, dateTo) === 0;
-  const resetButtonTitle = id ? 'Delete' : 'Cancel';
+  const resetButtonName = id ? 'Delete' : 'Cancel';
 
   return (
     `<li class="trip-events__item">
@@ -223,13 +223,15 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
           >
           ${isSaving ? 'Saving...' : 'Save'}
           </button>
+
           <button
             class="event__reset-btn"
             type="reset"
             ${isDisabled ? 'disabled' : ''}
           >
-          ${isDeleting ? 'Deleting...' : resetButtonTitle}
+          ${isDeleting ? 'Deleting...' : resetButtonName}
           </button>
+
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
