@@ -59,7 +59,7 @@ export default class BoardPresenter {
   }
 
   get events() {
-    this.#filterType = this.#filterModel.filter;
+    this.#filterType = this.#filterModel.activeFilter;
     const events = this.#eventsModel.events;
     const filteredEvents = filter[this.#filterType](events);
 
@@ -99,6 +99,7 @@ export default class BoardPresenter {
   #createEvent = (callback) => {
     this.#currentSortType = SORT_TYPES.DAY;
     this.#filterModel.setFilter(UPDATE_TYPE.MAJOR, FILTER_TYPES.EVERYTHING);
+
     if (this.#noEventsComponent) {
       remove(this.#noEventsComponent);
     }
@@ -108,6 +109,10 @@ export default class BoardPresenter {
 
   #handleNewEventFormClose = () => {
     this.#newEventButtonComponent.element.disabled = false;
+
+    if (this.events.length === 0) {
+      render(this.#noEventsComponent, this.#boardContainer);
+    }
   };
 
   #handleNewEventButtonClick = () => {

@@ -139,7 +139,7 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
   const offersTemplate = createOffersTemplate(availableOffers, offers);
   const destinationTemplate = createDestinationTemplate(destination);
   const destionationsListTemplate = createDestinationsListTemplate(destinationsСatalog);
-  const isSubmitDisabled = basePrice <= 0 || !destination.name || calculateDateDif(dateFrom, dateTo) === 0;
+  const isSubmitDisabled = basePrice === 0 || !destination.name || calculateDateDif(dateFrom, dateTo) === 0;
   const resetButtonName = id ? 'Delete' : 'Cancel';
 
   return (
@@ -209,7 +209,7 @@ const createEventEditTemplate = (event, destinationsСatalog, offersCatalog) => 
               id="event-price-${id}"
               type="number"
               name="event-price"
-              min="0"
+              min="1"
               step="1"
               value="${basePrice}"
               ${isDisabled ? 'disabled' : ''}
@@ -360,7 +360,7 @@ export default class EventEditView extends AbstractStatefulView {
     evt.preventDefault();
 
     this.updateElement({
-      basePrice: Number(evt.target.value),
+      basePrice: Math.floor(Math.max(evt.target.value, null)),
     });
   };
 
