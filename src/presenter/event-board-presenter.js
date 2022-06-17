@@ -14,7 +14,7 @@ import FilterPresenter from './filter-presenter.js';
 
 import {USER_ACTION, UPDATE_TYPE, FILTER_TYPES, SORT_TYPES} from '../constants.js';
 import {getSortedEvents, getSortedEventsbyDate} from '../utils/sort.js';
-import {filter} from '../utils/filter.js';
+import {eventsByFilterType} from '../utils/filter.js';
 
 const TIME_LIMIT = {
   LOWER_LIMIT: 350,
@@ -61,7 +61,7 @@ export default class BoardPresenter {
   get events() {
     this.#filterType = this.#filterModel.activeFilter;
     const events = this.#eventsModel.events;
-    const filteredEvents = filter[this.#filterType](events);
+    const filteredEvents = eventsByFilterType[this.#filterType](events);
 
     switch (this.#currentSortType) {
       case SORT_TYPES.DAY:
